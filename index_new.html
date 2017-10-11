@@ -1,0 +1,73 @@
+<!-- <!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/icons-extra.css">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/swiper.css">
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/home.css">
+	</head>
+
+	<body>
+		   <div id="main"></div>
+		   <a href="#" id="load_Balance" class="mui-icon mui-icon-reload"></a>
+	    		<div id="legend"></div>
+	<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+	<script src="js/mui.min.js"></script>
+	<script src="js/swiper.min.js"></script>
+	<script src="js/own.js"></script>
+	<script src="js/ripple-0.17.4-min.js"></script>
+	<script src="js/tradewise_api.js"></script>
+	<script type="text/javascript" src="js/echarts-all.js"></script>
+	<script>
+
+		mui.plusReady(function() {
+			var myChart = ec.init(document.getElementById('main')); 
+
+			var dataDict = [{value:24943},{value:744}];
+			
+			var color = ["#F67D00", "#19C3B2", "#0CA4FF", "#FF5B5B", "#EAD83D", "#C4B4E4","#DF9499","#A3ACC2"];
+	        var myChart = echarts.init(document.getElementById('main'));   
+//	        dataDict = [{value:100,name:"hello"}];
+			var option = {
+	            color : color,
+	        	 title : {
+	                text: '總資產',
+	                x : 'center',
+	                y : 'center',
+	                textStyle : {
+	                	fontSize : 28,
+	                	fontFamily : "sans-serif"
+	                }
+	            },
+	            series : [
+	                {
+	                    name:'總資產',
+	                    type:'pie',
+	                    center : ['50%', '50%'],
+	                    radius : ['60%', '70%'],
+	                    itemStyle : {
+	                        normal : {
+	                            label : {
+	                                show : false
+	                            },
+	                            labelLine : {
+	                                show : false
+	                            }
+	                        }
+	                    },
+	                    data: dataDict
+	                    
+	                }
+	            ]
+	       };
+        		myChart.setOption(option);
+		});
+	</script>
+</html> -->

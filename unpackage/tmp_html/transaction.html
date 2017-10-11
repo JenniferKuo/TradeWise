@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+	<script type="text/javascript" src="js/ripple-0.16.5.js"></script>
+	<script type="text/javascript" src="js/mui.min.js"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/app_tradewise.js"></script>
+    
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+		<link rel="stylesheet" type="text/css" href="css/own.css" />
+		<style type="text/css">
+		.title {
+			margin: 20px 15px 10px;
+			color: #6d6d72;
+			font-size: 15px;
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">Transaction</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-card">
+			
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" id="result_message">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+			<!--<div class="title">Active</div>
+			<ul class="mui-table-view" id="history">
+			</ul>-->
+			
+			
+	</body>
+	
+	<script type="text/javascript">
+   		mui.init({
+			swipeBack: false,
+			
+		});
+		mui.plusReady(function(){
+			
+			//initial
+			var address = 'rHLuoqLJ1p6YwiPo8gay4ZgLBB3CkYXDEw';
+			console.log(ripple);
+		    var api = new ripple.RippleAPI({server:'wss://s.altnet.rippletest.net:51233'});
+		    api.connect().then(function() {
+		        return api.getTransactions(address);
+		    }).then(function(transaction){
+		    		
+			  		console.log(JSON.stringify(transaction));
+			  		for(var i=0; i<= transaction.length; i++)
+			  		{
+			  			var d = new Date(transaction[i].outcome.timestamp);
+						var n = d.toLocaleString("zh-TW");
+			  			result_message.innerHTML += "["+n+"]" + "<td>"+transaction[i].type + "<br/>";
+			  		}
+			  	});
+			});
+      </script>
+</html>

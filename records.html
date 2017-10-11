@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<title>Hello MUI</title>
+		
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/records.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
+	</head>
+	<body>
+		<div class="mui-content">
+		<header class="bar">
+			<h1 class="mui-title">交易紀錄</h1>
+		</header>
+		<div style="padding: 10px 10px;background: white;border:none">
+                <div id="segmentedControl" class="mui-segmented-control">
+                	<a class="mui-control-item mui-active" href="#item2">
+                全部
+            </a>
+                    <a class="mui-control-item" href="#item3">
+                支出
+            </a>
+            <a class="mui-control-item mui" href="#item4">
+                收入
+            </a>
+                </div>
+        </div>
+            <div id="info-text" style="display: none">
+            	<img src="images/wallet.png" class="image">
+            	<p>目前還沒有任何交易紀錄！</p>
+            </div>
+
+            <div id="record-display">
+                <div id="item2" class="mui-control-content mui-active">
+                	
+                    <ul class="mui-table-view" id="result_message">
+					</ul>
+                    
+                    
+                    <ul class="mui-table-view">
+                    </ul>
+                </div>
+                <div id="item3" class="mui-control-content">
+                    <ul class="mui-table-view" id="send_message">
+                        
+                        
+                    </ul>
+                    <ul class="mui-table-view">
+                    </ul>
+                </div>
+                <div id="item4" class="mui-control-content">
+                    <ul class="mui-table-view" id="receive_message">
+                        
+                    </ul>
+                    <ul class="mui-table-view">
+                    </ul>
+                </div>
+            </div>
+			
+			
+				
+			
+			<!--<header class="mui-bar mui-bar-nav">
+				<a class="mui-action-back mui-pull-left">取消</a>
+				<a class="mui-pull-right">送出</a>
+				<a class="mui-action-back  mui-pull-left mui-btn-block">
+					<span class="ui-btn-inner ui-btn-corner-all">
+				      <span class="ui-btn-text">取消</span>
+				      <a class="mui-action-back">取消</a></span>
+				</a>
+				<a class="mui-btn-nav mui-pull-right">送出</a>-->
+				<!--<a class="mui-icon mui-pull-right"><img src="../images/qrcode_btn.png" width="30px" onclick="clicked('barcode_scan.html',true,true);"/></a>
+				
+				<h1 class="mui-title">付款</h1>
+				
+			</header>-->
+			 
+				
+			
+			
+			
+				
+				
+				
+			<!--<div class="mui-card" style="margin-bottom: 20px;">
+			<div class="mui-card-header">交易記錄
+			</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" >
+					</div>
+				</div>
+				
+			</div>-->
+		</div>
+	</body>		
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript" src="js/ripple-0.16.5.js"></script>
+		<script type="text/javascript" src="js/tradewise_api.js"></script>
+		<script>
+			//function for transaction
+			function result(data){
+				if(data == "tesSUCCESS"){
+					return "成功";
+				} else {
+					return "失敗";
+				}
+			}
+			function formatDate(date) {
+			  var hours = date.getHours();
+			  var minutes = date.getMinutes();
+			  var ampm = hours >= 12 ? 'pm' : 'am';
+			  hours = hours % 12;
+			  hours = hours ? hours : 12; // the hour '0' should be '12'
+			  minutes = minutes < 10 ? '0'+minutes : minutes;
+			  var strTime = hours + ':' + minutes + ' ' + ampm;
+			  var month = date.getMonth()+1;
+			  return date.getFullYear() +"/"+ month + "/" + date.getDate() + " " + strTime;
+			}
+
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			});
+			
+			
+			mui.plusReady(function() {
+				var self = plus.webview.currentWebview();
+			    window.addEventListener('refresh',function(event){   //监听自定义事件
+			        self.reload();
+			    });
+			    
+			    
+				var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});				var address = localStorage.getItem('address');
+				var min, max;
+				
+				
+			    
+			    api.connect().then(function(){
+					return api.getServerInfo();
+				}).then(function(server_info){
+					var current_ledger = server_info.completeLedgers.split("-");
+					//var setting = new Object();
+					//min = current_ledger[0];
+					//setting.maxLedgerVersion = current_ledger[1];
+					//var setting = {'':min, 'maxLedgerVersion':max};
+					var set = {
+						"minLedgerVersion" : parseInt(current_ledger[0]),
+						"maxLedgerVersion" : parseInt(current_ledger[1]),
+						"limit" : 10
+						
+					}
+					console.log(JSON.stringify(set));
+					return api.getTransactions(address, set).catch(function(error){
+						console.log("Error:", error);
+					});
+				}).then(function(transaction_info){
+		    			//clear first
+		    			//console.log(JSON.stringify(transaction_info));
+		    			//history.innerHTML = "";
+		    			console.log("Total records in ledger:"+transaction_info.length);
+		    			if(transaction_info.length == 0) {
+		    				document.getElementById("info-text").style.display = "block";
+		    			}
+			  		for(var i=0; i< transaction_info.length; i++)
+			  		{
+			  			//console.log(json.stringfy(transaction_info[i]));
+			  			//console.log(address);
+			  			if(transaction_info[i].type == 'payment'){
+			  				
+			  				if( (typeof(transaction_info[i].outcome.balanceChanges[address][0].currency) == "string") ){
+			  				
+			  				//if(transaction_info[i].outcome.result == "")
+			  				//console.log(JSON.stringify(transaction_info[i].outcome.balanceChanges[address]));
+			  				for(var j=1; j<=transaction_info[i].outcome.balanceChanges[address].length; j++)
+			  				{
+			  					//console.log(JSON.stringify(transaction_info[i].outcome.balanceChanges[address][j]));
+			  					//console.log(JSON.stringify());
+			  					
+		  						var balance_currency = transaction_info[i].outcome.balanceChanges[address][0].currency;
+		  				
+		  						var balance_val =  new Number(transaction_info[i].outcome.balanceChanges[address][0].value);
+		  						
+		  						if(balance_currency == "XRP")
+		  						{
+		  							var balance_currency = transaction_info[i].outcome.balanceChanges[address][1].currency;
+		  							var balance_val =  new Number(transaction_info[i].outcome.balanceChanges[address][1].value);
+		  						}
+			  					
+			  				}
+			  				//console.log(transaction_info[i].outcome.balanceChanges[address].length);
+			  				//console.log(JSON.stringify(transaction_info[i].outcome.balanceChanges[address]));
+			  				
+			  				//balance =
+			  				//console.log(transaction_info[i].outcome.balanceChanges[address][0]);		  				
+			  				//console.log(JSON.tostringify(transaction_info[i].outcome.balanceChanges[address][0]));
+			  				var datatime = new Date(transaction_info[i].outcome.timestamp);
+			  				var e = formatDate(datatime);
+			  				//console.log(e);
+			  				//var balance_cuy =transaction_info[i].outcome.balanceChanges[address][0].curency;
+			  				//var balance = transaction_info[i].outcome.balanceChanges[address][0].currency;
+			  				if(transaction_info[i].specification.destination.address == address){
+			  					type='receive';
+			  				} else {
+			  					type='send';
+			  				}
+			  				//console.log(JSON.stringify(transaction_info[i].specification.destination.address) );
+			  				
+				  			var html_string = '<li class="mui-table-view-cell mui-collapse">'
+				  			+ '<a class="mui-navigate-right" href="#">'
+				  			+'<div>';
+				  			if(type == 'send'){
+				  				html_string += '<img src="images/Cash in Hand.png" class="icon"><p style="text-align:left" class="expenses">';
+				  			}
+				  			else {
+				  				html_string += '<img src="images/Receive Cash.png" class="icon"><p style="text-align:left" class="income">';
+				  			}
+				  			
+				  			html_string += balance_val.toFixed(2)
+				  			+ '&#160;&#160;'
+				  			+ balance_currency +'</p>'
+				  			+'<div class="transdate">' + e + '</div>'
+				  			+'</div>'
+				  			+'</a>'
+							+ '<div class="mui-collapse-content">'
+							+ '<p>' 
+							//+ transaction_info[i].type +'<br/>'
+							//+ transaction_info[i].address +'<br/>'
+							+ '付款人：'
+							+transaction_info[i].specification.source.address +'<br/>'
+							+ '收款人：'
+							+transaction_info[i].specification.destination.address +'<br/>'
+							//+ transaction_info[i].address +'<br/>'
+							+ '流水號：'+ transaction_info[i].sequence +'<br/>'
+							+ '幣別：' +
+							balance_currency + '<br/>'
+							+ '金額：' +
+							balance_val.toFixed(2); + '<br/>'+
+							+'</p>'	
+							+'</div>'
+							+ '</li>';
+							
+							result_message.innerHTML += html_string;
+							
+							//console.log(balance_change)s
+								if( type == "send"){
+									send_message.innerHTML +='<li class="mui-table-view-cell mui-collapse">'
+				  			+ '<a class="mui-navigate-right" href="#">'
+				  			+'<div>'
+				  			+'<img src="images/Cash in Hand.png" class="icon"><p style="text-align:left" class="expenses">'+balance_val.toFixed(2)
+				  			+ '&#160;&#160;'
+				  			+ balance_currency +'</p>'
+				  			+'<div class="transdate">' + e + '</div>'
+				  			+'</div>'
+				  			+'</a>'
+							+ '<div class="mui-collapse-content">'
+							+ '<p>' 
+							//+ transaction_info[i].type +'<br/>'
+							//+ transaction_info[i].address +'<br/>'
+							+ '付款人：'
+							+transaction_info[i].specification.source.address +'<br/>'
+							+ '收款人：'
+							+transaction_info[i].specification.destination.address +'<br/>'
+							+ '流水號：'+ transaction_info[i].sequence +'<br/>'
+							+'支付金額：'
+							+transaction_info[i].specification.destination.amount.value +'<br/>'
+							+'支付貨幣：'
+							+transaction_info[i].specification.destination.amount.currency +'<br/>'
+							//+ transaction_info[i].address +'<br/>'
+							+ '----------<br/>' 
+							+ '轉換幣別：' +
+							balance_currency + '<br/>'
+							+ '扣款金額：' +
+							balance_val.toFixed(2); + '<br/>'+
+							+'</p>'	
+							+'</div>'
+							+ '</li>';
+								} else if( type == "receive"){
+									receive_message.innerHTML += html_string;
+								}
+							}
+						}
+						
+						/*
+						'<li class="mui-table-view-cell mui-collapse">';
+			  			history.innerHTML += transaction_info[i].type + transaction_info[i].outcome.timestamp+ transaction_info[i].outcome.result +"<br/>";
+			  			*/
+			  		}
+				}).catch(function(error){
+					console.log("Error:", error);
+							
+				});
+			});
+	</script>
+
+</html>

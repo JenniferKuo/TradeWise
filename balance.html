@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/icons-extra.css">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/swiper.css">
+		<link rel="stylesheet" href="css/main.css">
+		<!-- <link rel="stylesheet" href="css/home.css"> -->
+		<link rel="stylesheet" type="text/css" href="css/balance.css">
+	</head>
+
+	<body>
+		
+		<div class="mui-content">
+		<header class="bar">
+			<h1 class="mui-title">資產</h1>
+		</header>
+		<div id="balance_chart">		    
+        <div id="chart"></div>
+        <a href="#" id="load_Balance" class="mui-icon mui-icon-reload"></a>
+
+			<ul class="mui-table-view" id="legend">
+               <!--  <li class="mui-table-view-cell">
+                    <span style="color: #F67D00;font-size: 20pt">● </span>3620.24 USD
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #19C3B2;font-size: 20pt">● </span>744.80 CNY
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #0CA4FF;font-size: 20pt">● </span>744.80 CNY
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #FF5B5B;font-size: 20pt">● </span>3620.24 USD
+                </li>       -->                          
+            </ul>
+
+	    </div>	
+		</div>
+		
+	</body>
+	<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+	<script src="js/mui.min.js"></script>
+	<script src="js/swiper.min.js"></script>
+	<script src="js/own.js"></script>
+	<script src="js/ripple-0.17.4-min.js"></script>
+	<script src="js/tradewise_api.js"></script>
+	<script type="text/javascript" src="js/echarts.js"></script>
+	<script>
+		
+		mui.init({
+			swipeBack:false //启用右滑关闭功能
+		});
+
+
+		mui.plusReady(function() {
+			//var dataDict = {};
+			
+			var address = localStorage.getItem('address');
+			
+			
+			t = document.getElementById('test-btn');
+			balance = document.getElementById('balance');
+			load_balance();
+			
+			var refreshbtn = document.getElementById("load_Balance");
+			refreshbtn.addEventListener("tap",function () {
+				var self = plus.webview.currentWebview();
+				self.reload();
+			});
+			
+			//載入錢包餘額
+			function load_balance(){
+				// var color = ["#F67D00", "#19C3B2", "#0CA4FF", "#FF5B5B", "#EAD83D", "#C4B4E4","#DF9499","#A3ACC2"];
+				var color = ["#488CDD", "#EBE9E9", "#F3F8F2", "#FCB07E", "#DEE2D6", "#C4B4E4","#DF9499","#A3ACC2"];
+				
+				document.getElementById("legend").innerHTML = '<div class="loader mui-text-center"><a><span class="mui-spinner"></span></a><br /><span>載入中...</span></div>';
+//				console.log(ripple);
+	   			var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+			    	api.connect().then(function() {
+			        return api.getBalanceSheet(address);
+			    }).then(function(Balance_Row) {
+			    		var balances = Balance_Row.assets;
+			    		//console.log(JSON.stringify(balances));
+					document.getElementById("legend").innerHTML = '';
+			    		for(var i = 0; i < balances.length ; i++){
+			    			if( balances[i].currency != "XRP" ){
+			    				var num = new Number(balances[i].value);
+			    				document.getElementById("legend").innerHTML += '<div class="mui-table-view-cell"><span class="mui-icon" style="color:' + color[i] +'">●&nbsp;&nbsp;</span>'+ num.toFixed(2) + ' ' + balances[i].currency + '</div>';
+			    				dataDict.push({value:num.toFixed(0)});
+			    				console.log(JSON.stringify(dataDict));
+			    			}
+			    		}
+			    		return dataDict;
+			    		//console.log("hello"+JSON.stringify(dataDict));
+			    		//var circle = dataDict;
+			    }).then(function(da){
+			    	if(address == "rnVSE7ZVdCvCxF83inLvo3UpznocqexM3w"){
+			    		da[1].value = da[1].value * 4.29;
+			    		da[0].value = da[0].value * 30;
+			    	}  else {
+			    		da[0].value = da[0].value * 4.29;
+			    		da[1].value = da[1].value * 30;
+			    	}
+			    		
+			    	console.log("da=",da[0].value);
+			    	if(da[0].value< da[1].value){
+			    		
+			    		da[0].name = '5%';
+			    		da[0].value = da[0].value * 4.29;
+			    		da[1].name = '95%';
+			    		da[1].value = da[1].value * 30;
+			    	} else{
+			    		
+			    		da[0].value = da[0].value * 30;
+			    		da[0].name = '95%';
+			    		da[1].value = da[1].value * 4.29;
+			    		da[1].name = '5%';
+			    	}
+				
+			    
+			    	//console.log(JSON.stringify(da));
+			    	var myChart = echarts.init(document.getElementById('chart'));
+				var option = {
+					color: color,
+					title: {
+						text: '總資產',
+						x: 'center',
+						y: 'center',
+						textStyle: {
+							fontSize: 28,
+							fontFamily: "sans-serif"
+						}
+					},
+					series: [{
+						name: '總資產',
+						type: 'pie',
+						center: ['50%', '50%'],
+						radius: ['55%', '70%'],
+						 itemStyle: {
+						 	normal: {
+						 		label: {
+						 			show: true,
+									textStyle: {
+									        fontSize:16
+									}						 			 
+						 		},
+						 		labelLine: {
+						 			 show: true
+						 		}
+						 	}
+						 },
+						data:da 
+					}]
+				};
+				myChart.setOption(option);
+			    });
+			    
+			    
+			    /*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			/*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			
+			
+			
+
+			var dataDict = [];
+
+			var color = ["#488CDD", "#EBE9E9", "#F3F8F2", "#FCB07E", "#DEE2D6", "#C4B4E4","#DF9499","#A3ACC2"];
+				
+	        	
+				
+				}
+
+
+			//var secret = localStorage.getItem('secret');
+			//initial
+			
+		    
+			//触发submit按钮的点击事件
+			//mui.trigger(btn,'tap');
+			//添加newId自定义事件监听
+			
+			// var refreshbtn = document.getElementById("load_Balance");
+			// refreshbtn.addEventListener("tap",function () {
+			// 	load_balance();
+			// 	//load_balance2();
+			// });
+			
+			//var self = plus.webview.currentWebview();
+			//window.addEventListener('refresh',function(event){   //监听自定义事件
+		    //    self.reload();
+		    //});			
+
+		});
+	</script>
+</html>

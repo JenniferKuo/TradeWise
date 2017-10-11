@@ -1,0 +1,66 @@
+body {
+	color: #6d6d72;
+}
+.mui-content {
+	background-color: white;
+}
+.mui-navigate-right {
+	/*top: 10px;*/
+}
+.income {
+	font-family: 'Lato', sans-serif;
+	font-size: 18px;
+	width:40%;
+	margin-left:2.5%;
+	display: inline-block;
+	text-align: left;
+}
+.icon {
+	width: 30px;
+	float: left;
+	position: relative;
+	top: -5px;
+}
+.expenses {
+	color: #E74C3C;
+	font-family: 'Lato', sans-serif;
+	font-size: 18px;
+	width:40%;
+	margin-left:2.5%;
+	display: inline-block;
+	text-align: left;
+	float: left;
+	/*height: 50px;*/
+	/*line-height: 25px;*/
+}
+.transdate {
+	font-size: 14px;
+	font-family: 'Lato', sans-serif;
+	width: 40%;
+	text-align: right;
+	float: right;
+	display: inline-block;
+	line-height: normal;
+	margin-right: 6%;
+}
+.image {
+	width: 50%;
+	margin: 0 auto;
+}
+#info-text {
+	text-align: center;
+	padding-top: 20%;
+}
+#record-display {
+
+}
+.mui-table-view:before {
+	content: none;
+}
+.mui-table-view:after, .mui-table-view-cell:after{
+	content: none;
+}
+.mui-table-view-cell {
+	padding-top: 15px;
+	padding-bottom: 15px;
+}

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">	
+		<title>Hello MUI</title>
+		<link rel="stylesheet" href="../css/mui.css">
+		<link rel="stylesheet" href="../css/icons-extra.css">
+		<link rel="stylesheet" href="../css/font-awesome.css">
+		<style>
+			.title, .detail {
+				margin: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+			}
+			html,body {
+				background-color: #efeff4;
+			}
+			.mui-btn-block{
+				
+			}
+			.mui-input-row {
+				height:45px !important;
+				font-size: 13pt;
+			}
+			.qrcode_btn {
+				
+			}
+			.mui-table-view-cell {
+				padding: 15px 15px;
+			}
+			.ceil-rate{
+				position: absolute;
+				right: 15px;
+			}
+		</style>
+		
+	</head>
+	<body>
+		<div class="mui-content">
+			<div class="mui-content-padded" style="margin: 5px;">
+			<header class="mui-bar mui-bar-nav">
+				
+			
+			  <h1 class="mui-title">
+			  	付款
+			  </h1>
+			  
+             <!--<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left">取消</a>-->
+			  <!--<a id="confirmBtn" class="mui-btn mui-btn-link mui-pull-right">確認</a>-->
+			<!--<a class="mui-action-back mui-btn mui-btn-link">取消</a>-->
+		            
+				
+				<button type="button" class="mui-action-back mui-btn mui-btn-link">
+		            <span class="mui-icon mui-icon-back"></span>
+		            返回
+		       </button>
+		       
+				<!--<a class="mui-pull-right mui-icon-extra mui-icon-extra-sweep"></a>-->
+				<a class="mui-icon mui-icon-extra mui-icon-extra-sweep mui-pull-right" id="hide_button" style="display:none"></a>
+		        
+		        
+		        
+			</header>
+			
+			
+			<!--<header class="mui-bar mui-bar-nav">
+				<a class="mui-action-back mui-pull-left">取消</a>
+				<a class="mui-pull-right">送出</a>
+				<a class="mui-action-back  mui-pull-left mui-btn-block">
+					<span class="ui-btn-inner ui-btn-corner-all">
+				      <span class="ui-btn-text">取消</span>
+				      <a class="mui-action-back">取消</a></span>
+				</a>
+				<a class="mui-btn-nav mui-pull-right">送出</a>-->
+				<!--<a class="mui-icon mui-pull-right"><img src="../images/qrcode_btn.png" width="30px" onclick="clicked('barcode_scan.html',true,true);"/>-->
+				
+				<h1 class="mui-title">付款</h1>
+				
+			</header>-->
+				<div class="mui-content">
+					
+					<div class="detail" style="text-align: center; color:#000000">
+						<!--<span id="address"></span>-->
+						<!--<p id="trans"></p>-->
+					</div>
+					<form class="mui-input-group" id="sender">
+					    <div class="mui-input-row">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-6 mui-col-xs-6">
+					    				<input class="mui-input" placeholder="Recipient Address" id="address" style="text-align: center;" value="收款人" readonly="readonly" type="text">
+					    			</div>
+					    			<div class="mui-col-sm-6 mui-col-xs-6" style="">
+					    				<input class="mui-input" placeholder="" id="user" style="text-align: center;" readonly="readonly" type="text">
+					    			</div>
+					    		</div>
+					    </div>
+					    <div class="mui-input-row">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-6 mui-col-xs-6">
+					    				<input class="mui-input" placeholder="金額" id="trans" style="text-align: center;" readonly="readonly" type="text">
+					    			</div>
+					    			<button style="font-size:15pt;" class="mui-btn-link mui-col-sm-6 mui-col-xs-6" id="cuyDiaBtn">
+					    			</button>
+					    			<!--<input class="mui-input" placeholder="" id="trans" style="text-align: center;" readonly="readonly" type="text">-->
+					    			<!--<div class="mui-col-sm-5 mui-col-xs-5">
+					    			<input type="text" class="mui-input" placeholder="幣別" id="cuy" style="text-align: center;">
+					    			</div>-->
+					    		</div>
+					    </div>
+					    </form>	
+			</div>
+			
+			<div class="title">
+				錢包餘額
+			</div>
+			
+			<ul class="mui-table-view" id="wallet_balance">
+			</ul>
+			<br>
+			<div id="confirm_btn">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="confirmBtn" disabled="disabled">確認付款</button>
+			</div>
+			
+				
+			<!--<div class="mui-card" style="margin-bottom: 20px;">
+			<div class="mui-card-header">支付幣別
+			</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" id="result_message">
+					</div>
+					<ul class="mui-table-view" id="history">
+					</ul>
+				
+				</div>
+				
+			</div>-->
+				
+		</div>
+	
+	<script src="../js/mui.js"></script>
+		<script type="text/javascript" src="../js/jquery.js"></script>
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/ripple-0.16.5.js"></script>
+		<script type="text/javascript" src="../js/tradewise_api.js"></script>
+		<script>
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			});
+			
+			var make_path;
+			var address = localStorage.getItem('address');
+			var secret = localStorage.getItem('secret');
+			
+			document.getElementById('cuyDiaBtn').innerHTML = localStorage.getItem('cuy');
+			
+			self = plus.webview.currentWebview();
+			mui.plusReady(function() {
+				
+			 var trans = document.getElementById("trans").value;
+				
+			
+			 var wsUri = "wss://s.altnet.rippletest.net:51233";
+			 var output;
+			
+			  
+			
+			  function validate_WebSocket()
+			  {
+			    websocket = new WebSocket(wsUri);
+			    websocket.onopen = function(evt) { onOpen(evt) };
+			    //websocket.onclose = function(evt) { onClose(evt) };
+			    websocket.onmessage = function(evt){
+			    		onMessage(evt)
+			    	};
+			    websocket.onerror = function(evt) { onError(evt) };
+			  }
+			
+			  function onOpen(evt)
+			  {
+			    writeToScreen("CONNECTED");
+			    var send_address = address;
+			    var message = {
+				  id: 1,
+				  command: "subscribe",
+				  accounts: [address],
+				}
+			    
+			    //console.log(message);
+			    doSend(JSON.stringify(message));
+			  }
+			
+			  function onClose(evt)
+			  {
+			    writeToScreen("DISCONNECTED");
+			  }
+			
+			  function onMessage(evt)
+			  {
+			    writeToScreen(evt.data);
+			    var result = JSON.parse(evt.data);
+			    if(result.engine_result == "tesSUCCESS"){
+			    		document.getElementById("confirm_btn").innerHTML = '<div class="mui-text-center"><img src="../images/tick_blue.png" width="180px"/><h4>交易成功！</h4></div>';
+						
+					var homewebview = plus.webview.getWebviewById('home.html');
+					mui.fire(homewebview, 'refresh', {});
+
+					var balabcewebview = plus.webview.getWebviewById('balance.html');
+					mui.fire(balabcewebview, 'refresh', {});
+					
+					var recordwebview = plus.webview.getWebviewById('records.html');
+					mui.fire(recordwebview, 'refresh', {});
+					
+					mui.fire(plus.webview.currentWebview(), 'refresh_balance', {});
+			    }
+			    
+			  }
+			
+			  function onError(evt)
+			  {
+			    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+			  }
+			
+			 function doSend(message)
+			  {
+			    writeToScreen("SENT: " + message);
+			    websocket.send(message);
+			  }
+			
+			  function writeToScreen(message)
+			  {
+			    console.log(message);
+			  }
+	
+			window.addEventListener('re_path', function(){
+				
+				var api = new ripple.RippleAPI({server:'wss://s.altnet.rippletest.net:51233'});
+				api.connect().then(function() {
+						
+				var pathfind = {
+					"source": {
+						"address": address
+					},
+					"destination": {
+						"address": to_account,
+						"amount": {
+							"currency": to_type,
+							"counterparty": "rruF9hoG2NhjHCPcdseSVfnw5rG4CuEJF",
+							"value": to_num
+						}
+					}
+				}
+
+				return api.getPaths(function(pathfind){
+						console.log('ok');
+					}).catch(function(error) {
+						console.log("Error:", error);
+						mui.toast("錯誤：", error);
+						//process.exit();
+					}).then(function(paths){
+						
+						console.log(JSON.stringify(paths));
+						console.log(paths.length);
+						//document.getElementById("trans").value = to_num;
+						//document.getElementById("cuy").value = to_type;
+						});
+					});
+				});
+
+						window.addEventListener('refresh_balance', function() {
+							console.log(ripple);
+							var api = new ripple.RippleAPI({ server: 'wss://s.altnet.rippletest.net:51233' });
+							api.connect().then(function() {
+								return api.getBalanceSheet(address);
+							}).then(function(balanceSheet) {
+								document.getElementById("wallet_balance").innerHTML = "";
+								//console.log(JSON.stringify(balances));
+								//console.log(JSON.stringify(balanceSheet.assets));
+								for(var i = 0; i <= balanceSheet.assets.length; i++) {
+									//console.log(balanceSheet.assets[i].currency);
+									if(balanceSheet.assets[i].currency == localStorage.getItem('cuy')) {
+										document.getElementById("wallet_balance").innerHTML +=
+											'<li class="mui-table-view-cell" id="CNY">' + balanceSheet.assets[i].currency +
+											'<span class="ceil-rate" id="cuy_value">' + balanceSheet.assets[i].value + '</span></li>'; +
+										" " + balanceSheet.assets[i].value + "<br/>";
+									}
+								}
+							});
+						});
+
+						window.addEventListener('submit_payment', function() {
+				api.connect().then(function() {
+					var pathfind = {
+						"source": {
+							"address": address
+						},
+						"destination": {
+							"address": to_account,
+							"amount": {
+								"currency": to_type,
+								"counterparty": "rruF9hoG2NhjHCPcdseSVfnw5rG4CuEJF",
+								"value": to_num
+							}
+						}
+					};
+					return api.getPaths(pathfind).catch(function(error) {
+						console.log("Error:", error);
+						mui.toast("錯誤：", error);
+						process.exit();
+					});
+				}).then(function(paths) {
+					//console.log(JSON.stringify(paths));
+
+					document.getElementById("trans").value = paths[0].source.maxAmount.value;
+					document.getElementById("cuy").value = paths[0].source.maxAmount.currency;
+
+					//console.log(JSON.stringify(paths));
+					//console.log(JSON.stringify(paths[0]));
+					var payment = {
+						"source": {
+							"address": address,
+							"maxAmount": {
+								"value": paths[0].source.maxAmount.value, // "100"
+								"currency": document.getElementById("cuy").value,
+								"counterparty": "rruF9hoG2NhjHCPcdseSVfnw5rG4CuEJF"
+							}
+						},
+						"destination": {
+							"address": to_account,
+							"amount": {
+								"value": to_num,
+								"currency": to_type,
+								"counterparty": "rruF9hoG2NhjHCPcdseSVfnw5rG4CuEJF"
+							}
+						}
+					};
+
+					return api.preparePayment(address, payment).catch(function(error) {
+						console.log("Error:", error);
+						process.exit();
+
+					});
+
+				}).then(function(preparedPayment) {
+
+					console.log(preparedPayment);
+					return api.sign(preparedPayment.txJSON, secret);
+
+				}).then(function(signedPayment) {
+
+					console.log(signedPayment);
+					console.log("TX Id:", signedPayment.id);
+					//var transaction_id = signedPayment.id;
+
+					return api.submit(signedPayment.signedTransaction).catch(function(error) {
+
+						console.log("Error:", error);
+						process.exit();
+
+					});
+
+				}).then(function(submittedPayment) {
+
+					//console.log(submittedPayment);
+					//result_message.innerHTML += submittedPayment.resultCode +"<br/>" +submittedPayment.resultMessage;
+
+					if(submittedPayment.resultCode === "tesSUCCESS") {
+						console.log("交易成功送出");
+						// https://ripple.com/build/transactions/#full-transaction-response-list
+						/*
+						//mui.toast("付款成功");
+						console.log("Transaction made successfully to Bob!");
+						//return api.getTransaction(transaction_id);
+						*/
+						
+						
+						
+
+						validate_WebSocket();
+						
+						//reload after transaction success
+						
+					} else {
+
+						console.log("Something went wrong with Alice's payment!", submittedPayment);
+						process.exit();
+
+					}
+
+				}).then(function(){
+			        return api.getBalanceSheet(address);
+			    });
+			});
+			//var wvs=plus.webview.all();//initial
+				
+				
+				clicked('barcode_scan.html',true,true);
+				
+				
+				scanBtn = document.getElementById("qrcode_scan");
+				cuyBtn = document.getElementById("cuy");
+				sendWebview = plus.webview.currentWebview();
+				
+				// 监听DOMContentLoaded事件
+				//scanBtn.addEventListener('tap',function(){
+				//	clicked('barcode_scan.html',true,true);
+					//doSend(JSON.stringify(sign_info));
+				//},false);
+				
+				document.getElementById("confirmBtn").addEventListener('tap', function() {
+					
+					var btnArray = ['取消', '確認'];
+					mui.confirm('您的帳戶將會扣除'+ document.getElementById("trans").value + document.getElementById("cuy").innerHTML+'\n是否確認繼續？', '注意', btnArray, function(e) {
+						if (e.index == 0) {
+							//取消
+							
+						} else {
+							//總資產reload
+			  				//mui.back();
+			  				console.log("Start payment");
+			  				var self = plus.webview.currentWebview();
+							mui.fire(self, 'submit_payment', {});
+						}
+					})
+				});
+			});
+				
+			
+			
+			function scaned( t, r, f ) {
+				//應該要確認付款後，在呼叫錢包餘額
+				mui.fire(plus.webview.currentWebview(), 'refresh_balance', {});
+				//console.log(r);
+				//var result = atob(r);
+				var result = r;
+				//console.log(result);
+				//console.log(result);
+				//print(reg);
+			    var check = result.substring(0, 6);
+				if(check == "Ripple"){
+					var reg = result.split("/",4);
+					//console.log(JSON.stringify(reg));
+					qrcode_address = reg[0].toString();
+					to_account = qrcode_address.replace("Ripple:", "");
+					to_user = reg[1];
+					to_num = reg[2];
+					to_type = reg[3];
+					
+					//console.log(qrcode_address);
+					//document.getElementById("address").value = qrcode_address.replace("Ripple:", "");
+					document.getElementById("user").value = reg[1];
+					document.getElementById("trans").value = reg[2];
+					//document.getElementById("cuy").innerHTML = reg[3];
+					//document.getElementById("address").innerHTML = qrcode_address.replace("Ripple:", "");
+					//document.getElementById("user").innerHTML = reg[1];
+					mui.fire(plus.webview.currentWebview(), 're_path', {});
+				} else {
+					mui.toast("QRCODE格式錯誤！");
+					return false;
+				}
+			}
+	</script>
+
+</div></body></html>

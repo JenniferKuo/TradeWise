@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">	
+		<title>Hello MUI</title>
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/icons-extra.css">
+		<link rel="stylesheet" href="css/page.css">
+		<style>
+		.update {
+			font-style: normal;
+			color: #000000;
+			margin-right: -35px;
+			font-size: 15pt
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			  <h1 class="mui-title">
+			  	匯率
+			  </h1>
+			<a class="mui-action-back mui-btn mui-btn-link mui-back-title">關閉</a>
+		</header>
+		<br/>
+		<div class="mui-content" id="receiver">
+		
+		<ul class="mui-table-view mui-table-view-chevron">
+			<li class="mui-table-view-cell">
+				<a class="">BCX<i class="mui-pull-right update" id="BCX">1.00</i>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a class="">BTC<i class="mui-pull-right update" id="BTC">0.00</i>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a class="">CNY<i class="mui-pull-right update" id="CNY">0.00</i>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a href="">USD<i class="mui-pull-right update" id="USD">0.00</i>
+					
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a class="">NTD<i class="mui-pull-right update">0.00</i>
+				</a>
+			</li>
+		</ul>
+					
+			
+		
+		<br/>
+		<div id="qrcode_bg">
+		<div id="qrcode">
+		</div>
+		</div>
+		<h4 class="add" id="add"></h4>
+		<div class="mui-card-content-inner" id="result_message">
+			
+		</div>
+		</div>
+		
+		<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript" src="js/ripple-0.17.4-min.js"></script>
+		<script type="text/javascript" src="js/tradewise_api.js"></script>
+		<script type="text/javascript">
+   		mui.init({
+			swipeBack: false,
+		});
+		
+		mui.plusReady(function(){
+			
+			//(1)initial main currency
+			var app_currency = "BCX";
+			var app_currency_enable = {
+				"BCX":{
+					"issuer":""
+				},
+				"CNY":{
+					"issuer":"rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y"
+				},
+				"USD":{
+					"issuer":"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"
+				}
+			}
+			//console.log(JSON.stringify(app_currency_enable));
+			mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',function(data){
+				//console.log(data.rate);
+				document.getElementById("USD").innerHTML = dollars_regex(data.rate);
+			});
+			mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/BTC+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',function(data){
+				//console.log(data.rate);
+				document.getElementById("BTC").innerHTML = data.rate;
+			});
+			mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/CNY+rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y',function(data){
+				//console.log(data.rate);
+				document.getElementById("CNY").innerHTML = dollars_regex(data.rate);
+			});
+			
+			
+			//(2)get exchange rate1
+			//console.log(count(app_currency_enable));
+			//for(var i=0; i<app_currency_enable.length; i++){
+			//}
+				/*
+				mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',function(data){
+				data.rate;
+				
+			}
+		
+			
+					
+			mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',function(data){
+				data.rate;
+			});
+			
+			var BCX = function(){
+				mui.getJSON('http://data.ripple.com/v2/exchange_rates/XRP/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B',function(data){
+					return this.rate = data.rate;
+				});
+			};
+			*/
+
+//var webView = plus.webview.currentWebview().nativeInstanceObject();
+			//webView.plusCallMethod({"setKeyboardDisplayRequiresUserAction:":false});
+			//document.getElementById("amount").focus();
+			
+			/*
+			function initial(){
+				var cuy = "CNY";
+				//var cuy = localStorage.getItem('cuy');
+				document.getElementById("cuy_change_1").innerHTML += '<option value="'+ cuy +'">'+ cuy +'</option>';
+			}
+			function listen_cuy_change(){
+				var x =document.getElementById("cuy_change").value;
+				localStorage.setItem('cuy', x);
+			}
+			*/
+			
+		
+			var address = localStorage.getItem('address');
+			
+			
+		
+			
+		  	
+	
+		});
+		
+		function set_cuy(){
+			localStorage.setItem('cuy', document.getElementById("cuy_change_1").value);
+		}
+		function maxLengthCheck(object) {
+		    if (object.value.length > object.maxLength){
+		      object.value = object.value.slice(0, object.maxLength)
+		     }
+		    	qrcode_gen();
+		}
+		function dollars_regex(data){
+			var num = new Number(data);
+			return (num.toFixed(2));
+		}
+		    
+		  function isNumeric (evt) {
+		    var theEvent = evt || window.event;
+		    var key = theEvent.keyCode || theEvent.which;
+		    key = String.fromCharCode (key);
+		    var regex = /[0-9]|\./;
+		    if ( !regex.test(key) ) {
+		      theEvent.returnValue = false;
+		      if(theEvent.preventDefault) theEvent.preventDefault();
+		    }
+		  }
+      </script>
+</html>

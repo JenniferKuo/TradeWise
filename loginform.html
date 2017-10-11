@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/loginform.css" rel="stylesheet" />
+		<link href="css/main.css" rel="stylesheet" />
+		<link href="css/icon-extra.css" rel="stylesheet" />
+		<style>
+		html, body, .mui-content{
+			height: 100%;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="mui-content">
+			<div class="card">
+			<img style="display:block; margin:auto; padding:10px 0px 35px 0px" src="images/tradewise_logo.png" width="80%" />
+
+			<form id='login-form' class="mui-input-group">
+				<div class="mui-input-row">
+					<label><span class="mui-icon mui-icon-contact"></span></label>
+					<input id='account' name="account" type="url" class="mui-input-clear mui-input" placeholder="請輸入帳號" autocorrect="off" autocapitalize="none" pattern="d*"/>
+				</div>
+				<div class="mui-input-row">
+					<label><span class="mui-icon mui-icon-locked"></span></label>
+					<input id='pwd' name="pwd" type="password" class="mui-input-clear mui-input" placeholder="請輸入密碼">
+				</div>
+			</form>
+		</div>	
+			
+		<button id='login' class="mui-btn mui-btn-block mui-btn-primary">登入</button>
+		<div class="link-area"><a id='reg'>註冊帳號</a> <span class="spliter">|</span> <a id='forgetPassword'>忘記密碼</a>
+		</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<!-- <script src="js/mui.enterfocus.js"></script> -->
+		<!-- <script src="js/app.js"></script> -->
+		<script>
+			mui.init();
+			
+			mui.plusReady(function() {
+				 
+				loginbtn = document.getElementById('login');
+				register = document.getElementById('register');
+				repsd = document.getElementById('repsd');
+				loginWebview = plus.webview.currentWebview();
+				//检测本地的登录过的账号。
+				if (localStorage.getItem('account')) {
+					account.value = localStorage.getItem('account');
+				}
+				//登陆的点击事件
+				loginbtn.addEventListener('tap', function() {
+					var account_element = document.getElementsByName("account");
+					account = account_element[0].value;
+					var pwd_element = document.getElementsByName("pwd");
+					pwd = pwd_element[0].value;
+					//console.log(account+pwd);
+					//将两个数据存放起来，第一个是等出之后删除，第二个只要登录之后就会记录保存
+					//登入不區分大小寫待修
+					mui.ajax('https://tradewise.technology/webapp/api/index.php?action=login',{
+							data:{
+						       'account' : account,
+						       'pwd' : pwd
+						    },
+							//dataType:'json',//服务器返回json格式数据
+							type:'post',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；   
+							//headers:{'Content-Type':'application/json'},	  
+							success:function(data){
+								if(data.num == 1){
+									//console.log(JSON.stringify(data));
+									localStorage.setItem('username', data.name);
+									localStorage.setItem('address', data.address);
+									localStorage.setItem('secret', data.secret);
+									//localStorage.setUserData('login','true');
+									//localStorage.setItem('user', {});
+									//mui.toast('登入成功');
+									mui.toast('登入成功');
+									mui.openWindow({
+										url: "homeindex.html",
+										id:"homeindex.html"
+									});
+									document.getElementById("login-form").reset();
+								} else {
+									//mui.toast('帳號或密碼輸入錯誤');
+									mui.toast('帳號或密碼輸入錯誤');
+									return false;
+								}
+							},
+							error:function(xhr,type,errorThrown){
+								//异常处理；
+								mui.toast('網路連線異常');
+								console.log(type);
+							}
+						});
+					
+					
+					//添加事件接收close事件，并且要判断是否已经登录成功，然后页面close，因为login页面是预先加载的页面
+					//在这里向需要的页面发送消息事件通知已经登录做响应的处理
+					loginWebview.addEventListener('hide', function() {
+						mui.each(plus.webview.all(), function(index, item) {
+							console.log(item.id);
+						})
+					}, false);
+				}, false);
+			});
+		</script>
+	</body>
+
+</html>

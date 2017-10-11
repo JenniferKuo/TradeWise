@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>充值</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" href="css/mui.min.css" />
+		<link rel="stylesheet" href="css/main.css" />
+		<script type="text/javascript" src="js/mui.min.js"></script>
+		<style>
+			.mui-content-padded {
+				padding: 10px;
+			}
+			body,
+			body .mui-content {
+				background-color: #fff !important;
+			}
+			#total {
+				-webkit-user-select: text;
+				text-align: right;
+				padding: 0 1em;
+				border: 0px;
+				border-bottom: 1px solid #007aff;
+				border-radius: 0;
+				font-size: 16px;
+				width: 30%;
+				outline: none;
+			}
+			textarea{
+				margin-top: 10px;
+			}
+			.mui-btn-block{
+				padding: 8px 5px;
+			}
+		</style>
+	</head>
+	<body>
+		 <hrader class="mui-bar mui-bar-nav">
+		 	<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		 	<h1 id="title" class="mui-title">全球支付</h1>
+		 </hrader>
+         <div class="mui-content-padded">
+         <div id="dcontent" class="mui-content">
+			<div class="mui-content-padded">
+				<p style="text-indent: 22px;">
+					
+				</p>
+				<div style="padding: 0 1em;text-align:center">
+					充值金额：
+					<input id="total" type="number" value="1.0" style="text-align:center" /> 
+					 
+				</div>
+				<div class="mui-content-padded oauth-area">
+					<!--探测本机软件，自动显示支付宝和微信支付方式-->
+					<!--银联在线一直显示-->
+					<!--<div id='UN_WEB' class="mui-btn mui-btn-blue mui-btn-block pay">
+						银联在线
+					</div>-->
+					<div class="top" id="testLogin" >
+						<!--<input type="button" class="mui-btn mui-btn-block weixin" id="weixin1" value="微信支付" />-->
+	                		<input type="button" class="mui-btn mui-btn-primary mui-btn-block zhifubao" id="zhifubao" value="支付宝支付" />
+                		</div>
+                		
+                		
+					<!--<div id='weixin1' class="mui-btn mui-btn-blue mui-btn-block pay">
+						微信支付
+					</div>
+					<div id='zhifubao' class="mui-btn mui-btn-blue mui-btn-block pay">	
+						支付宝支付
+					</div>
+				-->
+				</div>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						支付方式: <span id="channel"></span>
+					</li>
+					<li class="mui-table-view-cell">
+						订单号: <span id="bill_no"></span>
+					</li>
+					<li class="mui-table-view-cell">
+						支付金额: <span id="total_fee"></span>
+					</li>
+					<li class="mui-table-view-cell">
+						支付状态:<span id="status"></span>
+					</li>
+					<textarea name="" id="status_msg" cols="20" rows="5"></textarea>
+				</ul>
+			</div>
+		</div>
+       	<script>
+       		var wxChannel = null; // 微信支付 
+	        var aliChannel = null; // 支付宝支付 
+	        var channel = null;   //支付通道
+	        mui.init({ 
+	            swipeBack:true //启用右滑关闭功能 
+	        }); 
+			
+			 mui.plusReady(function() {   
+            // 获取支付通道 
+                plus.payment.getChannels(function(channels){ 
+                for (var i in channels) {
+						if (channels[i].id == "wxpay") {
+							 wxChannel=channels[i]; 
+						}else{
+							aliChannel=channels[i]; 
+						}
+					}	
+                },function(e){ 
+                 alert("获取支付通道失败："+e.message); 
+                }); 
+        		});
+ 
+        //document.getElementById('weixin1').addEventListener('tap',function() { 
+            //console.log("微信"); 
+        //  pay('wxpay'); 
+        //}) 
+        document.getElementById('zhifubao').addEventListener('tap',function() { 
+            //console.log("zhifubao"); 
+            pay('alipay');  
+        });
+ 
+		//var ALIPAYSERVER='http://demo.dcloud.net.cn/helloh5/payment/alipay.php?total='; 
+        //var WXPAYSERVER='http://demo.dcloud.net.cn/helloh5/payment/wxpay.php?total='; 
+       var ALIPAYSERVER='http://demo.dcloud.net.cn/helloh5/payment/alipay.php?total='; 
+       var WXPAYSERVER='https://tradewise.technology/webapp/payment/alipay/index.php?total=';
+       
+        // 2. 发起支付请求 
+        function pay(id){ 
+                // 从服务器请求支付订单 
+                var PAYSERVER=''; 
+                if(id=='alipay'){ 
+                PAYSERVER=ALIPAYSERVER; 
+                channel = aliChannel; 
+            }else if(id=='wxpay'){ 
+                    PAYSERVER=WXPAYSERVER; 
+                    channel = wxChannel; 
+                }else{ 
+                    plus.nativeUI.alert("不支持此支付通道！",null,"充值"); 
+                    return; 
+             } 
+                var xhr=new XMLHttpRequest(); 
+                var amount = document.getElementById('total').value;
+               
+                xhr.onreadystatechange=function(){ 
+                    switch(xhr.readyState){ 
+                        case 4: 
+                        if(xhr.status==200){ 
+                            plus.payment.request(channel,xhr.responseText,function(result){ 
+                                plus.nativeUI.alert("充值成功！",function(){ 
+                                back();
+                            }); 
+                            },function(error){ 
+                                plus.nativeUI.alert("充值失败：" + error.code); 
+                            }); 
+                        }else{ 
+                            alert("获取订单信息失败！"); 
+                        } 
+                        break; 
+                    default: 
+                    break; 
+                } 
+         } 
+            xhr.open('GET',PAYSERVER+amount); 
+            xhr.send(); 
+    } 
+	
+       	</script>  
+	 <script type="text/javascript" src="js/immersed.js" ></script>
+	</body>
+</html>

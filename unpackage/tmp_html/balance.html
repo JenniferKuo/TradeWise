@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>E3</title>
+		<link rel="stylesheet" type="text/css" href="css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+		<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+		<link rel="stylesheet" type="text/css" href="css/own.css" />
+	<style type="text/css">
+		/*
+		.mui-table-view-cell .mui-active{
+			background-color: #0062CC !important;
+		}
+		.mui-table-view-cell .mui-active{
+			color:#FFFFFF !important;
+		}
+		.mui-table-view-cell {
+			padding: 15px 10px 15px 10px;
+			line-height: 30px;
+		}*/
+		.mui-icon-extra {
+			font-size:2.4em;
+		}
+		.heading {
+			margin: 20px 15px 10px;
+			color: #6d6d72;
+			font-size: 15px;
+		}	
+		.mui-media-body {
+			font-size:14pt;
+		}
+		</style>
+	</head>
+
+	<body>
+		<!--<div class="mui-content">
+			<div id="homeDiv" class="mui-content own-content-padding">
+				<div id="productSlider" class="mui-slider">
+				</div>
+				<div id="recommend" class="mui-table-view mui-grid-view own-gray-color">
+
+				</div>
+			</div>
+		</div>-->
+		<!--<div class="mui-content">
+			<ul class="mui-table-view">
+			    <li class="mui-table-view-cell">
+			        <a class="mui-navigate-right" id="sendBtn">付款</a>
+			    </li>
+			    <li class="mui-table-view-cell">
+			        <a class="mui-navigate-right" id="receiveBtn">收款</a>
+			    </li>
+			    <li class="mui-table-view-cell">
+			        <a class="mui-navigate-right">換匯</a>
+			    </li>
+			</ul>
+		</div>-->
+		
+		<div class="mui-content">
+		        <ul class="mui-table-view mui-grid-view mui-grid-9">
+		            <li class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-6"><a href="#" id="sendBtn">
+		                    <span class="mui-icon-extra mui-icon-extra-sweep"></span>
+		                    <div class="mui-media-body">付款</div></a></li>
+		            			<!--<span class="mui-icon mui-icon-email"><span class="mui-badge">5</span></span>-->
+		            <li class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-6"><a href="#" id="receiveBtn">
+		                    
+		                    <span class="mui-icon-extra mui-icon-extra-prech"></span>
+		                    <div class="mui-media-body">收款</div></a></li>
+		            
+		        </ul>
+		        
+		        
+		</div>
+		<div class="mui-content">
+			
+		<div class="mui-card" style="margin-bottom: 20px;">
+			<div class="mui-card-header">總資產
+				<a href="#" class="mui-card-link" onclick="javascript: load();return false;">
+					<!--<span class="mui-icon mui-icon-reload"></span>-->
+				</a>
+			</div>
+				<div class="mui-card-content">
+					<ul class="mui-table-view" id="history">
+					</ul>
+					<div class="loader" style="display:none;">
+							<a>
+								<span class="mui-spinner"></span>
+							</a>
+							<div>
+								<span style="display: inline-block;">載入中...</span>
+							</div>
+					</div>
+				
+				</div>
+				<div class="mui-card-footer"><div class="title">更新時間：<span id="t_now"></span>
+				<a onclick="javascript: loadbalance();return false;">更新</a>
+				<!--<button onclick="load();">更新</button>-->
+			</div>	</div>
+			</div>
+		<!--
+		<div class="mui-card">
+			<div class="mui-card-header">近期交易</div>
+			<div class="mui-card-content">
+				<div class="mui-card-content-inner">
+					
+					<ul class="mui-table-view" id="history">
+					</ul>
+				</div>
+			</div>
+			<div class="mui-card-footer">
+				<div class="title">更新時間：
+					<span id="t_now"></span>
+			<a onclick="javascript: load();return false;">更新</a>
+			<button onclick="load();">更新</button>
+				</div>
+			</div>
+		</div>-->
+		
+			<!--<div class="mui-content-padded">
+			<ul class="mui-table-view mui-grid-view mui-grid-9">
+	            <li class="mui-table-view-cell mui-media mui-col-xs-12 mui-col-sm-12"><a href="#">
+	            <span class="mui-icon mui-icon-person"></span>
+	            <div class="mui-media-body">Main Account
+	            </div></a></li>
+		    </ul>
+		 </div>-->
+		    <!--<div class="mui-content-padded">
+		    	 
+		        <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="sendBtn">付款</button>
+		        <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="receiveBtn">收款</button>
+		       <button type="button" class="mui-btn mui-btn mui-btn-block">離線支付</button>
+		    </div>-->
+		
+	</body>
+	<script src="js/mui.min.js" charset="UTF-8"></script>
+	<script src="js/own.js" charset="UTF-8"></script>
+	<script src="js/jquery.min.js" charset="UTF-8"></script>
+	<script src="js/app_tradewise.js" charset="UTF-8"></script>
+	<script type="text/javascript">
+
+		mui.init({	
+			
+		});
+		var t;
+		var address = localStorage.getItem('address');
+		var time_now = document.getElementById('t_now');
+		
+		var balance;
+		var ripple_account;
+		var sendBtn;
+		var receiveBtn;
+		var receive;
+		/*
+		var remote = ripple.Remote.from_config({
+			"trusted": false,
+			"websocket_ip": "s.altnet.rippletest.net",
+			"websocket_port": "51233",
+			"websocket_ssl": true,
+			"local_signing": true
+		});
+		*/
+		
+		mui.plusReady(function() {
+			//console.log(onBridgeReady(connect));
+			
+			//start test
+			
+			
+			
+			loadbalance();
+			
+			sendBtn = document.getElementById('sendBtn');
+			receiveBtn = document.getElementById('receiveBtn');
+			t = document.getElementById('test-btn');
+			balance = document.getElementById('balance');
+			
+			
+			sendBtn.addEventListener('tap', function() {
+				//检测已经存在sessionkey否者运行下面的登陆代码
+					//old
+					
+					pushWebView({
+						webType: 'newWebview_First',
+						id: 'page/send.html',
+						href: 'page/send.html',
+						aniShow: getaniShow(),
+						title: "Send",
+						isBars: false,
+						barsIcon: '',
+						extendOptions: {
+							first_visit : 'yes'
+						}
+					});
+					/*
+					pushWebView({
+						webType: 'newWebview_First',
+						id: 'page/barcode_scan.html',
+						href: 'page/barcode_scan.html',
+						aniShow: getaniShow(),
+						title: "Send",
+						isBars: false,
+						barsIcon: '',
+						extendOptions: {}
+					});
+					*/
+					
+				//console.log("123");
+			}, false);
+			
+
+
+			receiveBtn.addEventListener('tap', function(id,wa,ns,ws) {
+				//检测已经存在sessionkey否者运行下面的登陆代码
+				
+				pushWebView({
+						webType: 'newWebview_First',
+						id: 'page/receive.html',
+						href: 'page/receive.html',
+						aniShow: getaniShow,
+						duration: 10000,
+						title: "Send",
+						isBars: false,
+						barsIcon: '',
+						extendOptions: {}
+					});
+					/*
+					if(openw){//避免多次打开同一个页面
+						return null;
+					}
+					if(w.plus){
+						wa&&(waiting=plus.nativeUI.showWaiting());
+						ws=ws||{};
+						ws.scrollIndicator||(ws.scrollIndicator='none');
+						ws.scalable||(ws.scalable=false);
+						var pre='';//'http://192.168.1.178:8080/h5/';
+						openw=plus.webview.create(pre+id,id,ws);
+						ns||openw.addEventListener('loaded',function(){//页面加载完成后才显示
+				//		setTimeout(function(){//延后显示可避免低端机上动画时白屏
+							openw.show(as);
+							closeWaiting();
+				//		},200);
+						},false);
+						openw.addEventListener('close',function(){//页面关闭后可再次打开
+							openw=null;
+						},false);
+						return openw;
+					}else{
+						w.open(id);
+					}
+					return null;
+					*/
+				//console.log("123");
+			}, false);
+			
+			
+			/*
+			t.addEventListener('tap',function(){
+				account.innerText = JSON.parse(localStorage.getItem('address'));
+				ripple_account = JSON.parse(localStorage.getItem('address'));
+				mui.ajax('https://api.altnet.rippletest.net:5990/v1/accounts/'+ripple_account+'/balances/',{
+					data: JSON.stringify({
+				    }),
+					processData: false,
+					dataType:'json',//服务器返回json格式数据
+					type:'get',//HTTP请求类型
+					timeout:10000,//超时时间设置为10秒；
+					headers:{'Content-Type':'application/json'},	              
+					success:function(data){
+						//console.log(JSON.stringify(data.balances));
+						
+						for (var k in data.balances) {
+							//console.log(data.balances[k]);
+							balance.innerText = data.balances[k].value+" "+data.balances[k].currency;
+						}
+						//console.log(JSON.stringify(data));
+						//console.log(JSON.stringify(data.address));
+						//account = JSON.stringify(data.address).replace('"','').replace('"','');
+						//console.log(JSON.stringify(data.address));
+						//var result = JSON.parse(data);
+						//console.log(result[address]);
+						
+						//localStorage.setItem('address', data.address);
+						//localStorage.setItem('secret', data.secret);
+						//plus.storage.setItem('address', data.address);
+						//plus.localStorage.setItem('address', data.address);
+						//plus.localStorage.setItem('secret', data.secret);
+						//var address = data.getString("address");
+						//console.log(plus.localstorage.getItem(address));
+						//plus.storage.setItem('address', data.address);
+						//plus.storage.setItem('address', data.secret);
+						
+						
+						//localStorage.setItem('address', JSON.stringify(data.address));
+						//console.log(localStorage.getItem('address'));
+						//localStorage.setItem('address', JSON.stringify(data.address,'"').toString());
+					},
+					error:function(xhr,type,errorThrown){
+						//异常处理；
+						console.log(type);
+					}
+					//account.innerText = JSON.parse(localStorage.getItem('address'));
+				});
+				
+				//console.log('123');
+				//var address = ;
+				//account.style.font-size = '''black''';
+				
+				//console.log(JSON.parse(localStorage.getItem('address'));
+				
+			});
+			*/
+			//接收登录成功事件
+			
+			
+			
+			//var item=localStorage.getItem(address);
+			//console.log(item);
+			
+			//GetBalance();
+			/*
+			window.addEventListener('loginSuccess',function(){
+				var address=localStorage.getItem(address);
+				
+				mui.ajax('https://api.altnet.rippletest.net:5990/v1/accounts/'+address+'/balances',{
+				data: JSON.stringify({
+			       
+			    }),
+				processData: false,
+				dataType:'json',//服务器返回json格式数据
+				type:'get',//HTTP请求类型
+				timeout:10000,//超时时间设置为10秒；
+				headers:{'Content-Type':'application/json'},	              
+				success:function(data){
+					console.log(JSON.stringify(data));
+					console.log(JSON.stringify(data.address));
+					//var result = JSON.parse(data);
+					//console.log(result[address]);
+					//.setItem('address', data.address);
+					//localStorage.setItem('secret', data.secret);
+					//var address = data.getString("address");
+					//console.log(address);
+				},
+				error:function(xhr,type,errorThrown){
+					//异常处理；
+					console.log(type);
+					}
+				});
+			}*/
+			
+		});
+		
+		
+		/*
+		mui.init({
+			swipeBack: false
+		});
+		var currentWebview;
+		var homeDiv;
+		var marqueeArray = []; //跑马灯数据数组
+		var recommendArray = []; //推荐商品数组
+		mui.plusReady(function() {
+			currentWebview = plus.webview.currentWebview();
+			homeDiv = document.getElementById('homeDiv');
+			//初始化一些本地数据
+			initSomeData();
+			//设置跑马灯
+			setMarquee();
+			//设置推荐商品
+			setRecommend();
+			//添加每个item点击的监听事件
+			mui('#recommend').on('tap', 'a', function() {
+				var item = this;
+				var itemID = this.getAttribute('href');
+				var extendOptions = {
+					itemID: itemID
+				};
+				pushWebView({
+					webType: 'newWebview_First',
+					id: 'Home/product-detail-needtem.html',
+					href: 'Home/product-detail-needtem.html',
+					aniShow: getaniShow(),
+					title: "商品详情",
+					isBars: false,
+					barsIcon: '',
+					extendOptions: extendOptions
+				});
+			});
+		})
+
+		function initSomeData() {
+			for (var i = 0; i < 20; i++) {
+				var dataItem = {};
+				dataItem.product_price = {default_price:"20.00",list_price:"28.0"};
+				dataItem.product_name = "这都是些什么鬼东西啊有什么用啊啊啊 ";
+				dataItem.large_image_url = "../img/1.jpg";
+				dataItem.product_id = "13110";
+				recommendArray.push(dataItem);
+			}
+			for (var i = 0 ; i < 4;i++	) {
+				var marqueeItem  = {};
+				marqueeItem.contentId = i;
+				if (i == 3) {
+					marqueeItem.imagerpath = '../img/slider/slider4.png';
+				} else{
+					marqueeItem.imagerpath = '../img/slider/slider'+(i+1)+'.jpg';
+				}
+				marqueeArray.push(marqueeItem);
+			}
+		}
+
+		function setMarquee() {
+			var sliderMarquee = document.getElementById('productSlider');
+			var sliderGroup = document.createElement('div');
+			sliderGroup.className = 'mui-slider-group mui-slider-loop';
+			sliderMarquee.appendChild(sliderGroup);
+			var sliderIndicator = document.createElement('div');
+			sliderIndicator.className = 'mui-slider-indicator';
+			sliderMarquee.appendChild(sliderIndicator);
+			for (var i = 0; i < marqueeArray.length; i++) {
+				if (0 == i) {
+					var sliderItemDuplicate = document.createElement('div');
+					sliderItemDuplicate.className = 'mui-slider-item mui-slider-item-duplicate';
+					sliderItemDuplicate.innerHTML = '<a href="' + marqueeArray[marqueeArray.length - 1].contentId + '">\
+							<img src="' + marqueeArray[marqueeArray.length - 1].imagerpath + '" />\
+						</a>';
+					sliderGroup.appendChild(sliderItemDuplicate);
+				}
+				var sliderItem = document.createElement('div');
+				sliderItem.className = 'mui-slider-item';
+				sliderItem.innerHTML = '<a href="' + marqueeArray[i].contentId + '">\
+						<img src="' + marqueeArray[i].imagerpath + '" />\
+					</a>';
+				sliderGroup.appendChild(sliderItem);
+				var indicatorItme = document.createElement('div');
+				if (i == 0) {
+					indicatorItme.className = 'mui-indicator mui-active';
+				} else {
+					indicatorItme.className = 'mui-indicator';
+				}
+				sliderIndicator.appendChild(indicatorItme);
+				if (marqueeArray.length - 1 == i) {
+					var sliderItemDuplicate = document.createElement('div');
+					sliderItemDuplicate.className = 'mui-slider-item mui-slider-item-duplicate';
+					sliderItemDuplicate.innerHTML = '<a href="' + marqueeArray[0].contentId + '">\
+							<img src="' + marqueeArray[0].imagerpath + '" />\
+						</a>';
+					sliderGroup.appendChild(sliderItemDuplicate);
+				}
+				slider = mui('.mui-slider').slider({
+					interval:2000
+				});
+			}
+		}
+		//设置推荐商品
+		function setRecommend() {
+			var recommend = document.getElementById('recommend');
+			mui.each(recommendArray, function(index, item) {
+				var li = document.createElement('li');
+				li.className = 'mui-table-view-cell mui-media mui-col-xs-6';
+				li.innerHTML = '<a href="' + item.product_id + '">\
+					<div class= "bgDiv">\
+						<img class="mui-media-object" src="'+item.large_image_url+'"/>\
+						<div class="mui-media-body">\
+							<p class="mui-ellipsis-2">' + item.product_name + '</p>\
+							<p class="price-one">¥' + item.product_price.default_price + '</p>\
+							<p class="price-two">¥' + item.product_price.list_price + '</p>\
+						</div>\
+					</div>\
+				</a>';
+				recommend.appendChild(li);
+			});
+		} */
+		function loadbalance(){
+				clear();	
+				$('.loader').show();
+				mui.ajax('https://api.altnet.rippletest.net:5990/v1/accounts/'+address+'/balances',{
+					processData: false,
+					dataType:'json',//服务器返回json格式数据
+					type:'get',//HTTP请求类型
+					timeout:10000,//超时时间设置为10秒；       
+					success:function(data){
+						
+						
+						//console.log(data.balances);
+						//Object.keys(data.balances).map(key => data.balances[key]);
+						//console.log(data.balances);
+						//each type one raw
+						for(var i = 0; i < data.balances.length; i++){
+							$("#history").append('<li class="mui-table-view-cell mui-media"><a href="javascript:;"><img class="mui-media-object mui-pull-right" src=""><div class="mui-media-body">'+data.balances[i].currency +' '+data.balances[i].value +'<p class="mui-ellipsis">'+data.balances[i].counterparty+'</p></div></a></li>');	
+						}
+						//get update time
+						 update_time();
+						
+						//console.log(timeInMs);
+						
+						//console.log(data.balances[0].currency);
+						//console.log(data.balances.length);
+					},
+					error:function(xhr,type,errorThrown){
+						console.log(type);
+					},
+					complete:function(){
+					  $('#history').show();
+                      $('.loader').hide();
+                      $('.title').show();
+               		},
+				});
+			}
+			function update_time(){
+				//var timeInMs = Date.now();
+				//time_now.innerHTML = timeInMs.toString();
+				var now = new Date();
+			    var strDateTime = [[AddZero(now.getFullYear()), 
+			        AddZero(now.getMonth() + 1), 
+			        AddZero(now.getDate())].join("/"), 
+			        [AddZero(now.getHours()), 
+			        AddZero(now.getMinutes()), AddZero(now.getSeconds())].join(":"), 
+			        now.getHours() >= 12 ? "PM" : "AM"].join(" ");
+			    //console.log(strDateTime);
+			    time_now.innerHTML = strDateTime;			
+			}
+			
+			function AddZero(num) {
+			    return (num >= 0 && num < 10) ? "0" + num : num + "";
+			}
+			function clear(){
+				$("#history").hide();
+				$("#history").empty();
+				$(".title").hide();
+				//$(".title").empty();
+			}
+			/*
+			function scaned( t, r, f ) {
+				console.log(r);
+				var reg = r.split("/",3);
+				var qrcode_address = reg[0].toString();
+				
+				var to_account = qrcode_address.replace("Ripple:", "");
+				var to_num = reg[1];
+				var to_type = reg[2];
+				
+				console.log(qrcode_address);
+				document.getElementById("address").value = qrcode_address.replace("Ripple:", "");
+				document.getElementById("num").value = reg[1];
+				document.getElementById("type").value = reg[2];
+			}*/
+			
+	</script>
+</html>

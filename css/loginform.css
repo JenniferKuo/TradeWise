@@ -1,0 +1,42 @@
+body, .mui-content {
+	padding-top: 20px;
+	background: #27c1f9;			    
+    background: linear-gradient(#27c1f9, #49E3AD); 
+}
+.link-area {
+	display: block;
+	margin-top: 25px;
+	text-align: center;
+	color: white;
+}
+.spliter {
+	color: #bbb;
+	padding: 0px 8px;
+}
+#login {
+	background-color: #3ACCBD;
+	border-radius: 30px;
+	border: none;
+	width: 80%;
+	margin: 0 auto;
+}
+a {
+	color: white;
+}
+span {
+	opacity: 0.4;
+}
+#login-form {
+	padding: 0 5%;
+	margin-bottom: 25px;
+	border-bottom-right-radius: 12px;
+	border-bottom-left-radius: 12px;
+}
+.card {
+	padding: 20px;
+	background: white;
+	width: 86%;
+	margin: 0 auto;
+	border-radius: 12px;
+	margin-bottom: 20px;
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+	<script src="js/ripple-0.16.5.js"></script>
+	<script type="text/javascript" src="js/mui.min.js"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/app_tradewise.js"></script>
+    
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+		<link rel="stylesheet" type="text/css" href="css/own.css" />
+		<style type="text/css">
+		.title {
+			margin: 20px 15px 10px;
+			color: #6d6d72;
+			font-size: 15px;
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">Send</h1>
+		</header>
+		<div class="mui-content">
+			<form class="mui-input-group">
+					<div class="mui-input-row">
+						<label>address</label>
+						<input type="text" class="mui-input-clear" value="rGb7xE1ThnHLRuCz4wwXTbncwFJzqwYCfQ" id="dest_address">
+					</div>
+					<div class="mui-input-row">
+						<label>value</label>
+						<input type="text" value="1" id="send_value">
+					</div>
+					<div class="mui-input-row">
+						<label>currency</label>
+						<input type="text" class="mui-input-clear" value="XRP" id="send_currency">
+					</div>
+					<div class="mui-button-row">
+						<button type="button" class="mui-btn mui-btn-primary" id="sendBtn">Send</button>&nbsp;&nbsp;
+					</div>
+				</form>
+		</div>
+		<div class="mui-card">
+			
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" id="result_message">
+					</div>
+				</div>
+			</div>
+			<!--<div class="title">Active</div>
+			<ul class="mui-table-view" id="history">
+			</ul>-->
+			
+			
+	</body>
+	
+	<script type="text/javascript">
+   		mui.init({
+			swipeBack: false,
+			
+		});
+		mui.plusReady(function(){
+			
+			//initial
+			
+		    var btn = document.getElementById("sendBtn");
+			btn.addEventListener("tap",function () {
+				console.log(ripple);
+				var api = new ripple.RippleAPI({server:'wss://s.altnet.rippletest.net:51233'});
+			    api.connect().then( function(){
+				  /* begin custom code ------------------------------------ */
+				  // Alice
+				  var payment = {
+				    "source": {
+				      "address": "rHLuoqLJ1p6YwiPo8gay4ZgLBB3CkYXDEw",
+				      "maxAmount": {
+				        "value": "1", // "100"
+				        "currency": "XRP"
+				      }
+				    },
+				    "destination": {
+				      "address": document.getElementById("dest_address").value ,
+				      "amount": {
+				        "value":document.getElementById("send_value").value,
+				        "currency": document.getElementById("send_currency").value
+				      }
+				    }
+				  };
+				
+				  return api.preparePayment("rHLuoqLJ1p6YwiPo8gay4ZgLBB3CkYXDEw", payment).catch( function(error){
+				    
+				    console.log("Error:", error);
+				    process.exit();
+				
+				  });
+				
+				}).then(function(preparedPayment){
+				    
+				  //console.log(preparedPayment);
+				
+					
+				  return api.sign(preparedPayment.txJSON, "shuMtUKehAnPh98UJNKrxr3uZ4RVP");
+				
+				}).then(function(signedPayment){
+				
+				  // console.log(signedPayment)
+				  //console.log("TX Id:", signedPayment.id);
+				  var transaction_id = signedPayment.id;
+				  
+				  return api.submit(signedPayment.signedTransaction).catch(function(error){
+				    
+				    console.log("Error:", error);
+				    process.exit();
+				
+				  });
+				
+				}).then(function(submittedPayment){
+				
+				  // console.log(submittedPayment);
+				  result_message.innerHTML += submittedPayment.resultCode +"<br/>" +submittedPayment.resultMessage;
+				
+				  if(submittedPayment.resultCode === "tesSUCCESS") {
+				    // https://ripple.com/build/transactions/#full-transaction-response-list
+				
+				    console.log("Transaction made successfully to Bob!");
+				    return api.getTransaction(transaction_id);
+				    
+				  } else {
+				
+				    console.log("Something went wrong with Alice's payment!", submittedPayment);
+				    process.exit();
+				
+				  }
+				
+				  /* end custom code -------------------------------------- */
+				
+				}).then(function(verify){
+					console.log(verify);
+				});
+			});
+		});
+      </script>
+</html>

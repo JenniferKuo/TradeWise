@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" href="../css/font-awesome.min.css">
+		<style>
+			html,body {
+				/*background-color: #F8F8F8;*/
+			}
+			.mui-input-row label {
+				padding:15px 15px;
+			}
+			.input-title {
+				height: 50px;
+			}
+			.mui-input-group .mui-input-row {
+			    height: 50px;
+			}
+			input[type="text"] {
+				height: 50px;
+			}
+			.mui-input-row select {
+				padding-top:10px;
+			}
+			.mui-btn-block {
+				font-size: 15pt;;
+			}
+			.mui-input-group {
+				margin-bottom: 10px;
+			}
+		</style>
+		<script>
+			//mui.init({
+			//	swipeBack:true //启用右滑关闭功能
+			//});
+			//mui.plusReady(function() {
+				//localStorage.getItem('address');
+				//console.log(address);
+				
+			//});
+			/*
+			// 扩展API加载完毕后调用onPlusReady回调函数
+			document.addEventListener( "plusready", onPlusReady, false );
+			
+			// 扩展API加载完毕，现在可以正常调用扩展API
+			function onPlusReady() {
+			  var e = document.getElementById("scan");
+			  e.removeAttribute( "disabled" );
+			}
+			// 从图片中扫描 
+			function scanImg() {
+				plus.barcode.scan( '_www/barcode.png', function (type,result) {
+				alert( "Scan success:("+type+")"+result );
+					}, function (error) {
+						alert( error.message );
+					} );
+			}
+			*/
+		</script>
+	</head>
+	<body>
+		<div class="mui-content">
+			<div class="mui-content-padded" style="margin: 5px;">
+			<header class="mui-bar mui-bar-nav">
+				<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+				<a class="mui-icon-upload mui-icon mui-pull-right"></a>
+				<h1 class="mui-title">收款</h1>
+			</header>
+				<div class="mui-content">
+					<form class="mui-input-group">
+					    <div class="mui-input-row">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-8 mui-col-xs-8">
+					    				<input type="text" class="mui-input" placeholder="0.00" pattern="[0-9]*" style="text-align: right; font-size: 15pt;" id="dollar" oninput="qrcode_gen();">	
+					    			</div>
+					    			<div class="mui-col-sm-4 mui-col-xs-4">
+					    				<select class="mui-btn-block" style="font-size: 15pt;" id="type" onchange="qrcode_gen();">
+									</select>
+					    			</div>
+					    		</div>	        
+					    </div>
+					</form>
+					
+					
+					<div style="text-align:center;background-color: #efeff4;">
+					<img id="qrcode_gen" src='' rel='nofollow' alt='QRcode address' style="width: 80%;border:0px">
+					</div>
+						
+					
+					
+				
+					
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="../js/mui.min.js" charset="UTF-8"></script>
+	<script src="../js/own.js" charset="UTF-8"></script>
+	<script src="../js/jquery.min.js" charset="UTF-8"></script>
+	<script>
+	mui.init({
+				swipeBack:true //启用右滑关闭功能
+	});
+	
+	
+	var v_dollar = document.getElementById("dollar");
+	var tran_dollar;
+	var tran_type;
+	var v_type = document.getElementById("type");
+	var address = localStorage.getItem('address'); 
+	
+	mui.plusReady(function() {
+		
+		dollars_find();
+		//console.log(localStorage.getItem('address'));
+		
+		window.addEventListener('loginSuccess', function() {
+			mui.ajax('https://api.altnet.rippletest.net:5990/v1/accounts/'+localStorage.getItem('address')+'/balances',{
+			processData: false,
+			dataType:'json',//服务器返回json格式数据
+			type:'get',//HTTP请求类型
+			timeout:10000,//超时时间设置为10秒；             
+			success:function(data){
+				//console.log(data.balances);
+				//Object.keys(data.balances).map(key => data.balances[key]);
+				//console.log(data.balances);
+				
+				for(var i = 0; i < data.balances.length; i++){
+					$("#type").append('<option value="'+data.balances[i].currency +'">'+data.balances[i].currency +'</option>');
+				}
+				
+				//console.log(data.balances[0].currency);
+				//console.log(data.balances.length);
+			},
+			error:function(xhr,type,errorThrown){
+				console.log(type);
+			}
+		});
+		}, false);
+		
+		qrcode_gen();
+		
+		
+		
+		//监听点击事件
+		//v_dollar.addEventListener("tap",function () {
+		//  	document.getElementById('address').value = localStorage.getItem('address') ; 
+		//	document.getElementById("qrcode_gen").src='https://chart.googleapis.com/chart?cht=qr&chl=Ripple:'+localStorage.getItem('address')+'&chs=180x180&choe=UTF-8&chld=L|2';
+		
+		//触发submit按钮的点击事件
+		
+	});
+	
+	
+	
+	function qrcode_gen(){
+		if(v_dollar.value.length == 0) {
+			tran_dollar = 0;
+			tran_type = "XRP";
+		} else {
+			tran_dollar  = v_dollar.value;
+			tran_type = v_type.value;
+		}
+		
+		var uri = "Ripple:"+localStorage.getItem('address')+"/"+localStorage.getItem('username')+"/"+tran_dollar+"/"+tran_type;
+		
+		document.getElementById("qrcode_gen").src='https://chart.googleapis.com/chart?cht=qr&chl='+btoa(uri)+'&chs=160x160&choe=UTF-8&chld=L|2';
+		}
+		
+	function dollars_find(){
+		mui.ajax('https://api.altnet.rippletest.net:5990/v1/accounts/'+address+'/balances',{
+			processData: false,
+			dataType:'json',//服务器返回json格式数据
+			type:'get',//HTTP请求类型
+			timeout:10000,//超时时间设置为10秒；             
+			success:function(data){
+				//console.log(data.balances);
+				//Object.keys(data.balances).map(key => data.balances[key]);
+				//console.log(data.balances);
+				
+				for(var i = 0; i < data.balances.length; i++){
+					$("#type").append('<option value="'+data.balances[i].currency +'">'+data.balances[i].currency +'</option>');
+				}
+				
+				//console.log(data.balances[0].currency);
+				//console.log(data.balances.length);
+			},
+			error:function(xhr,type,errorThrown){
+				console.log(type);
+			}
+		});
+	}
+		
+	</script>
+
+</html>

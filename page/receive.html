@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">	
+		<title>Hello MUI</title>
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" href="../css/icons-extra.css">
+		<link rel="stylesheet" href="../css/page.css">
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			  <h1 class="mui-title">
+			  	收款
+			  </h1>
+			<a class="mui-action-back mui-btn mui-btn-link mui-back-title">關閉</a>
+		</header>
+		<br/>
+		<div class="mui-content" id="receiver">
+			<form class="mui-input-group" id="receiver_form">
+					    <div class="mui-input-row">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-8 mui-col-xs-8">
+					    				<input type="text"  pattern="[0-9]*" class="mui-input" placeholder="0.00" min="1" max="9999999999" maxlength = "10" onkeypress="return isNumeric(event)"
+    oninput="maxLengthCheck(this)" style="text-align: center; font-size: 15pt;" id="amount" >	
+					    			</div>
+					    			<div class="mui-col-sm-4 mui-col-xs-4">
+					    				<select class="mui-btn-block" style="font-size: 15pt;" id="cuy_change_1" onchange="set_cuy();">
+									</select>
+					    			</div>
+					    		</div>	        
+					    </div>
+					</form>
+					
+					
+			
+		
+		<br/>
+		<div id="qrcode_bg">
+		<div id="qrcode">
+		</div>
+		</div>
+		<h4 class="add" id="add"></h4>
+		<div class="mui-card-content-inner" id="result_message">
+			
+		</div>
+		</div>
+		
+		<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/ripple-0.17.4-min.js"></script>
+		<script type="text/javascript" src="../js/tradewise_api.js"></script>
+		<script type="text/javascript" src="../js/qrcode.js"></script>
+		<script type="text/javascript">
+		 function maxLengthCheck(object) {
+		    if (object.value.length > object.maxLength){
+		      object.value = object.value.slice(0, object.maxLength)
+		     }
+		    	qrcode_gen();
+		  }
+		    
+		  function isNumeric (evt) {
+		    var theEvent = evt || window.event;
+		    var key = theEvent.keyCode || theEvent.which;
+		    key = String.fromCharCode (key);
+		    var regex = /[0-9]|\./;
+		    if ( !regex.test(key) ) {
+		      theEvent.returnValue = false;
+		      if(theEvent.preventDefault) theEvent.preventDefault();
+		    }
+		  }
+		
+		
+   		mui.init({
+			swipeBack: false,
+			
+		});
+		
+		mui.plusReady(function(){
+
+			//var webView = plus.webview.currentWebview().nativeInstanceObject();
+			//webView.plusCallMethod({"setKeyboardDisplayRequiresUserAction:":false});
+			//document.getElementById("amount").focus();
+			
+			function initial(){
+				var cuy = localStorage.getItem('cuy');
+				document.getElementById("cuy_change_1").innerHTML += '<option value="'+ cuy +'">'+ cuy +'</option>';
+			}
+			function listen_cuy_change(){
+				var x =document.getElementById("cuy_change").value;
+				localStorage.setItem('cuy', x);
+			}
+			
+			initial();
+		
+			var address = localStorage.getItem('address');
+			document.getElementById("add").innerHTML = address;
+			console.log(ripple);
+		    
+		    api.connect().then(function() {
+		        return api.getBalanceSheet(address);
+		    }).then(function(BalanceSheet) {
+		    		//console.log(BalanceSheet);
+		    		console.log(JSON.stringify(BalanceSheet.assets));
+		    		
+		    		var get_cuy = BalanceSheet.assets;
+		    		//localStorage.setItem('cuy', get_cuy[0].currency);
+		    		//cuy_change_1.innerHTML = "";
+		    		
+		    		for(var i=0; i<get_cuy.length;i++)
+		    		{
+		    			if( get_cuy[i].currency != localStorage.getItem('cuy') )
+		    			{
+		    				cuy_change_1.innerHTML += '<option value="'+ get_cuy[i].currency+'">'+get_cuy[i].currency+'</option>';
+		    			}
+		    			/*
+		    			if(get_cuy[i].currency != localStorage.getItem('cuy')){
+		    				cuy_change_1.innerHTML += '<option value="'+ get_cuy[i].currency+'">'+get_cuy[i].currency+'</option>';
+		    			}
+		    			*/
+		    		}
+		    		qrcode_gen();
+		    });
+			
+			var trans_count, last_trans_count;
+			var first = true;
+			
+			//press clear button
+			mui("body").on("tap", ".mui-icon-clear", function() {
+				qrcode_gen();
+			});
+			
+			qrcode_gen();
+			
+			//var mySocket = new WebSocket("wss://s.altnet.rippletest.net", "51233");
+			  var wsUri = "ws://s.altnet.rippletest.net:51233";
+			  var output;
+			
+			  function init()
+			  {
+			    testWebSocket();
+			  }
+			
+			  function testWebSocket()
+			  {
+			    websocket = new WebSocket(wsUri);
+			    websocket.onopen = function(evt) { onOpen(evt) };
+			    websocket.onclose = function(evt) { onClose(evt) };
+			    websocket.onmessage = function(evt){
+			    		onMessage(evt)
+			    	};
+			    websocket.onerror = function(evt) { onError(evt) };
+			  }
+			
+			  function onOpen(evt)
+			  {
+			    writeToScreen("CONNECTED");
+			    //mui.toast("交易主機連線成功");
+			    //mui.toast("輸入收款金額產生交易QRcode");
+			    var send_address = address;
+			    var message = {
+				  id: 1,
+				  command: "subscribe",
+				  accounts: [address],
+				}
+			    
+			    //console.log(message);
+			    doSend(JSON.stringify(message));
+			  }
+			
+			  function onClose(evt)
+			  {
+			    writeToScreen("DISCONNECTED");
+			  }
+			
+			  function onMessage(evt)
+			  {
+			    writeToScreen(evt.data);
+			    var result = JSON.parse(evt.data);
+			    if(result.engine_result == "tesSUCCESS"){
+			    		//document.getElementById("receiver").innerHTML = '';
+			    		
+			    		document.getElementById("receiver_form").innerHTML= "";
+			    		document.getElementById("qrcode").innerHTML= '<div class="mui-text-center"><img src="../images/confirm.png" width="180px"/><h4>交易成功！</h4></div>';
+			    		document.getElementById("add").innerHTML="";
+			    		
+			    		
+			    		
+			    		var homewebview = plus.webview.getWebviewById('home.html');		
+					mui.fire(homewebview, 'refresh', {});
+					
+					var balabcewebview = plus.webview.getWebviewById('balance.html');
+					mui.fire(balabcewebview, 'refresh', {});
+					
+					var recordwebview = plus.webview.getWebviewById('records.html');
+					mui.fire(recordwebview, 'refresh', {});
+			    }
+			    
+			  }
+			
+			  function onError(evt)
+			  {
+			    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+			  }
+			
+			 function doSend(message)
+			  {
+			    writeToScreen("SENT: " + message);
+			    websocket.send(message);
+			  }
+			
+			  function writeToScreen(message)
+			  {
+			    console.log(message);
+			  }
+			
+			  init();
+			
+			//qrcode.clear(); // clear the code.
+			//qrcode.makeCode("http://naver.com"); // make another code.
+			
+			//initial
+			/*
+			console.log(ripple);
+			var api = new ripple.RippleAPI({server:'wss://s.altnet.rippletest.net:51233'});
+			api.connect().then(function() {
+		        mui.toast("[online]收款程序開啟");
+		  	});
+			
+			api.on('connected', function()  {
+			  console.log('Connection is open now.');
+			});
+			api.on('error', function(errorCode, errorMessage, data){
+			  console.log(errorCode + ': ' + errorMessage);
+			});
+			
+			api.on('ledger', function(){
+				//return api.getAccountInfo(address).then(function(info){
+				//	console.log(JSON.stringify(info));
+				//});
+				var trans = ledger.transactionCount.toString();
+			});
+			*/
+			//Websocket API
+			
+		  	
+			//-----start listening-----//
+			//api.on('connected',function(connection){
+				//console.log(ledger[0].transactionCount, , null, 2);
+				//console.log(JSON.stringify(ledger, null, 2));
+				//var tran= JSON.stringify(ledger, null, 2);
+				//console.log(tran.baseFeeXRP);
+				
+				//use this to listgen on ledger
+				//console.log(JSON.stringify(ledger, null, 2));
+				/*
+				 * 
+				var trans = ledger.transactionCount.toString();
+				if((trans != last_trans_count) && (first == false)){
+					//接收到ledger
+					console.log(ledger.transactionCount.toString());
+					console.log(ledger.ledgerHash.toString());
+					first = true;
+					
+					
+					
+				}
+				*/
+				//var console.log(ledger.transactionCount.toString());
+				//console.log(ledger.ledgerHash.toString());
+				//last_trans_count = trans;
+				//first = false;
+				//console.log("123");
+				
+			//});
+		});
+			function qrcode_gen(){
+				document.getElementById("qrcode").innerHTML = "";
+				var message = "Ripple:"+ localStorage.getItem('address') +"/"+ localStorage.getItem('username')+"/"+document.getElementById("amount").value+"/"+ document.getElementById("cuy_change_1").value;
+				var output = {
+					text: btoa(message),
+					width: 180,
+    					height: 180
+				}
+		//console.log(btoa(message));
+				qrcode = new QRCode(document.getElementById("qrcode"), output);
+
+				//mui.toast("輸入收款金額來產生QRcode");
+			}
+			function set_cuy(){
+				localStorage.setItem('cuy', document.getElementById("cuy_change_1").value);
+				qrcode_gen();
+			}
+      </script>
+</html>

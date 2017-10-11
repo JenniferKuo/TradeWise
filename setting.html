@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/setting.css">
+	</head>
+
+	<body>
+		<!--<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">设置</h1>
+		</header>-->
+		
+		<div class="mui-content">
+			<header class="bar">
+				<h1 class="mui-title">設定</h1>
+			</header>
+			<!--<div class="title" style="">
+				交易貨幣
+			</div>
+			<select id="cuy_change" style="display:block;padding:15px;" onchange="listen_cuy_change();">
+			</select>-->
+			<!--
+			<div class="title">
+				交易貨幣(type2)
+			</div>
+			<ul class="mui-table-view">
+			    <li class="mui-table-view-cell user">
+			        <a class="mui-navigate-right" id='cuy_change_2'>Item 1</a>
+			    </li>
+		    </ul>
+		   -->
+		   	
+		   	<!--<ul class="mui-table-view mui-table-view-chevron">
+				<li class="mui-table-view-cell mui-media">
+					<a class="mui-navigate-right" href="#account">
+						<img class="mui-media-object mui-pull-left head-img" id="head-img" src="">
+						<div class="mui-media-body">
+							Hello MUI
+							<p class='mui-ellipsis'>账号:hellomui</p>
+						</div>
+					</a>
+				</li>
+			</ul>-->
+			
+			
+			<!--<ul class="mui-table-view mui-table-view-chevron" style="margin-top: 25px;">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" id="pay">充值 <i class="mui-pull-right update"></i></a>
+				</li>
+			</ul>-->
+			<div class="title">貨幣別</div>
+			<ul class="mui-table-view mui-table-view-chevron">
+				<li class="mui-table-view-cell">
+					<a id="currency_change" href="#currency_change" class="mui-navigate-right">BCX <i class="mui-pull-right update"></i></a>
+				</li>
+			</ul>
+			<div class="title">關於我們</div>	
+			<ul class="mui-table-view mui-table-view-chevron">
+				<li class="mui-table-view-cell">
+					<a id="about" href="#about" class="mui-navigate-right">關於 <i class="mui-pull-right update"></i></a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a href="">版本號 <i class="mui-pull-right update">Alpha v1.3.3</i></a>
+				</li>
+			</ul>
+<!-- 			
+			<ul class="mui-table-view" style="margin-top: 25px;">
+				<li class="mui-table-view-cell">
+					<a style="text-align: center;color: #FF3B30;" id="exit">
+						登出
+					</a>
+				</li>
+			</ul> -->
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="exit" >
+			    <!-- <span class="mui-icon-extra mui-icon-extra-sweep"> --></span> 登出</button>
+		</div>
+		</style>
+	</body>
+	<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+	<script src="js/mui.min.js"></script>
+	<script src="js/ripple-0.17.4-min.js"></script>
+	<script src="js/tradewise_api.js"></script>
+	<script>
+		function listen_cuy_change(){
+			var x =document.getElementById("cuy_change").value;
+			//localStorage.setItem('cuy', x);
+			
+			var homewebview = plus.webview.getWebviewById('home.html');		
+			  mui.fire(homewebview, 'refresh', {});
+			
+			  var balabcewebview = plus.webview.getWebviewById('balance.html');	
+			  mui.fire(balabcewebview, 'refresh', {});
+			
+		}
+		
+		//link
+		var address = localStorage.getItem('address');
+	    api.connect().then(function() {
+	        return api.getBalanceSheet(address);
+	    }).then(function(BalanceSheet) {
+	    		//console.log(BalanceSheet);
+	    		console.log(JSON.stringify(BalanceSheet.assets));
+	    		
+	    		var get_cuy = BalanceSheet.assets;
+	    		
+	    		
+	    });
+	    
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		mui.plusReady(function(){
+			document.getElementById("currency_change").addEventListener('tap',function () {
+				mui.openWindow({
+					url: 'currency.html',
+					id:'currency_change',
+					show:{
+				      autoShow:true,//页面loaded事件发生后自动显示，默认为true
+				      aniShow:"slide-in-right"
+				    }
+				});
+			});
+			/*
+			document.getElementById("pay").addEventListener('tap',function () {
+			// window.parent.location.href = './login.html';
+			// mui.openWindow('login.html');
+			 mui.openWindow({
+			    url: 'https://tradewise.technology/payment/wappay/pay.php',
+			    id:'payment'
+			 });
+			});
+			*/
+		});
+		document.getElementById("exit").addEventListener('tap',function () {
+			// window.parent.location.href = './login.html';
+			// mui.openWindow('login.html');
+			
+			/**
+			 * mui.openWindow({
+			    url: 'login.html', 
+			    id:'info'
+			 });
+			 */
+			
+			 
+			 mui.back();
+			 
+			 
+		});
+		
+		document.getElementById("about").addEventListener('tap',function () {
+			mui.openWindow({
+			    url: 'about.html', 
+			    id:'about'
+			 });
+		});
+		
+		
+		window.addEventListener('cuy_change',function(event){
+			  //获得事件参数
+			  //console.log('aaa');
+			  
+			  //使用方法
+			  //var balancewebview = plus.webview.getWebviewById('balance.html');
+			  //mui.fire(balancewebview, 'refresh', {});
+			  //currency_change.innerHTML = '';
+			 // currency_change.innerHTML = localStorage.getItem('cuy');
+			  
+			  var homewebview = plus.webview.getWebviewById('home.html');		
+			  mui.fire(homewebview, 'refresh', {});
+			
+			  var balabcewebview = plus.webview.getWebviewById('balance.html');	
+			  mui.fire(balabcewebview, 'refresh', {});
+		});
+		/*
+		document.getElementById('cuy_change_2').addEventListener('tap', function() {
+		  mui.openWindow({
+		    url: 'currency.html', 
+		    id:'currency'
+		  });
+		  
+		  
+		});
+		*/
+	</script>
+
+</html>

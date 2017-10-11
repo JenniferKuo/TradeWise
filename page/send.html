@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">	
+		<title>Hello MUI</title>
+		<link rel="stylesheet" href="../css/mui.css">
+		<link rel="stylesheet" href="../css/icons-extra.css">
+		<link rel="stylesheet" type="text/css" href="../css/page.css">
+	</head>
+	<body>
+		<div class="mui-content">
+			<header class="mui-bar mui-bar-nav">
+			  <h1 class="mui-title">
+			  	付款
+			  </h1>	
+				<a class="mui-action-back mui-btn mui-btn-link mui-back-title">關閉</a>
+			</header>
+				<div class="mui-content">
+					
+					<div class="detail" style="text-align: center; color:#000000">
+					</div>
+					<form class="mui-input-group" id="sender">
+					    <div class="mui-input-row">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-6 mui-col-xs-6">
+					    				<input class="mui-input" placeholder="Recipient Address" id="address" value="收款人" readonly="readonly" type="text">
+					    			</div>
+					    			<div class="mui-col-sm-6 mui-col-xs-6" style="">
+					    				<input class="mui-input" placeholder="" id="user" style="text-align: center;" readonly="readonly" type="text">
+					    			</div>
+					    		</div>
+					    </div>
+					    <div class="mui-input-row" style="display:none;">
+					    		<div class="mui-row">
+					    			<div class="mui-col-sm-6 mui-col-xs-6">
+					    				<input class="mui-input" placeholder="金額" id="trans" style="text-align: center;" readonly="readonly" type="text">
+					    			</div>
+					    			<button style="font-size:15pt;" class="mui-btn-link mui-col-sm-6 mui-col-xs-6" id="cuy" disabled="disabled">
+					    			</button>
+					    			<div class="mui-col-sm-5 mui-col-xs-5">
+					    			<input type="text" class="mui-input" placeholder="幣別" id="cuy" style="text-align: center;">
+					    			</div>
+					    		</div>
+					    </div>
+					    </form>	
+			</div>
+			
+			<div id="path_select_div">
+				<div class="title">
+					付款貨幣選擇
+				</div>
+				<ul class="mui-table-view" id="path_select">
+				</ul>
+			</div>
+			
+			
+			<div class="title">
+				<div id="balance_title">交易前餘額</div>
+			</div>
+			
+			<ul class="mui-table-view" id="wallet_balance">
+			</ul>
+
+			<br>
+			<div id="confirm_btn">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="confirmBtn">確認付款</button>
+			</div>
+			
+			
+			
+				
+			<!--<div class="mui-card" style="margin-bottom: 20px;">
+			<div class="mui-card-header">支付幣別
+			</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" id="result_message">
+					</div>
+					<ul class="mui-table-view" id="history">
+					</ul>
+				
+				</div>
+				
+			</div>-->
+				
+		<!--</div>-->
+	</div>
+	</body>
+	<script src="../js/mui.js"></script>
+	<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+		<script type="text/javascript" src="../js/jquery.js"></script>
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/ripple-0.17.4-min.js"></script>
+		<script type="text/javascript" src="../js/tradewise_api.js"></script>
+		<script>
+			
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			});
+			
+			var make_path;
+			var address = localStorage.getItem('address');
+			var secret = localStorage.getItem('secret');
+			
+			//document.getElementById('cuy').innerHTML = localStorage.getItem('cuy');
+			
+			mui.plusReady(function() {
+				
+			var trans = document.getElementById("trans").value;
+			var wsUri = "ws://s.altnet.rippletest.net:51233";
+			var output;
+	
+			  
+			
+			  function validate_WebSocket()
+			  {
+			    websocket = new WebSocket(wsUri);
+			    websocket.onopen = function(evt) { onOpen(evt) };
+			    //websocket.onclose = function(evt) { onClose(evt) };
+			    websocket.onmessage = function(evt){
+			    		onMessage(evt)
+			    	};
+			    websocket.onerror = function(evt) { onError(evt) };
+			  }
+			
+			  function onOpen(evt)
+			  {
+			    writeToScreen("CONNECTED");
+			    var send_address = address;
+			    var message = {
+				  id: 1,
+				  command: "subscribe",
+				  accounts: [address],
+				}
+			    
+			    //console.log(message);
+			    doSend(JSON.stringify(message));
+			  }
+			
+			  function onClose(evt)
+			  {
+			    writeToScreen("DISCONNECTED");
+			  }
+			
+			  function onMessage(evt)
+			  {
+			    writeToScreen(evt.data);
+			    var result = JSON.parse(evt.data);
+			    if(result.engine_result == "tesSUCCESS"){
+			    		plus.nativeUI.closeWaiting();
+			    		document.getElementById("balance_title").innerHTML = "交易完成餘額";
+			    		document.getElementById('path_select_div').innerHTML = '';
+			    		document.getElementById("confirm_btn").innerHTML = '<div class="mui-text-center"><img src="../images/confirm.png" width="180px"/><h4>交易成功！</h4></div>';
+					mui.fire(plus.webview.currentWebview(), 'refresh_balance', {});
+					
+					var homewebview = plus.webview.getWebviewById('home.html');
+					mui.fire(homewebview, 'refresh', {});
+
+					var balabcewebview = plus.webview.getWebviewById('balance.html');
+					mui.fire(balabcewebview, 'refresh', {});
+					
+					var recordwebview = plus.webview.getWebviewById('records.html');
+					mui.fire(recordwebview, 'refresh', {});
+					
+					websocket.onclose = function(evt) { onClose(evt) };
+					
+			    }
+			    
+			  }
+			
+			  function onError(evt)
+			  {
+			    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+			  }
+			
+			 function doSend(message)
+			  {
+			    writeToScreen("SENT: " + message);
+			    websocket.send(message);
+			  }
+			
+			  function writeToScreen(message)
+			  {
+			    console.log(message);
+			  }
+	
+	
+	
+			window.addEventListener('refresh_balance', function(){
+				console.log(ripple);
+			    var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+			    	api.connect().then(function() {
+			        return api.getBalanceSheet(address);
+			    }).then(function(balanceSheet) {
+			    		document.getElementById("wallet_balance").innerHTML = "";
+			    		//console.log(JSON.stringify(balances));
+			    		//console.log(JSON.stringify(balanceSheet.assets));
+			    		for(var i = 0; i< balanceSheet.assets.length; i++){
+			    			//console.log(balanceSheet.assets[i].currency);
+			    			//if(balanceSheet.assets[i].currency == localStorage.getItem('cuy')){
+			    				var old_value = Number(balanceSheet.assets[i].value);
+				    			document.getElementById("wallet_balance").innerHTML +=
+				    			'<li class="mui-table-view-cell" id="CNY">'+balanceSheet.assets[i].currency+
+				        '<span class="ceil-rate" id="cuy_value">'+ old_value.toFixed(2) +'</span></li>';
+				    			 + " " + balanceSheet.assets[i].value+"<br/>";
+			    			//}
+			    		}
+			    });
+			});
+			
+			window.addEventListener('submit_payment', function() {
+				var j = document.querySelector('input[name="select_path"]:checked').value;
+				api.connect().then(function() {
+					var pathfind = {
+						"source": {
+							"address": address
+						},
+						"destination": {
+							"address": to_account,
+							"amount": {
+								"currency": to_type,
+								"counterparty": "rJqxzXy37BrqTzduTPjM78MnPWepBntUcv",
+								"value": to_num
+							}
+						}
+					};
+					return api.getPaths(pathfind).catch(function(error) {
+						console.log("Error:", error);
+						mui.toast("錯誤：", error);
+						process.exit();
+					});
+				}).then(function(paths) {
+					//console.log(JSON.stringify(paths));
+					document.getElementById("trans").value = paths[j].source.maxAmount.value;
+					document.getElementById("cuy").value = paths[j].source.maxAmount.currency;
+					//console.log(JSON.stringify(paths[j]));
+					//console.log("path:"+document.getElementById("select_path").value);
+					//console.log(paths[j].source.maxAmount.value);
+					//console.log(paths[j].source.maxAmount.currency);
+					
+					//console.log(JSON.stringify(paths));
+					//console.log(JSON.stringify(paths[0]));
+					var payment = {
+						"source": {
+							"address": address,
+							"maxAmount": {
+								"value": paths[j].source.maxAmount.value, // "100"
+								"currency": paths[j].source.maxAmount.currency,
+								"counterparty": "rJqxzXy37BrqTzduTPjM78MnPWepBntUcv"
+							}
+						},
+						"destination": {
+							"address": to_account,
+							"amount": {
+								"value": to_num,
+								"currency": to_type,
+								"counterparty": "rJqxzXy37BrqTzduTPjM78MnPWepBntUcv"
+							}
+						}
+					};
+
+					return api.preparePayment(address, payment).catch(function(error) {
+						console.log("Error:", error);
+						process.exit();
+
+					});
+
+				}).then(function(preparedPayment) {
+
+					console.log(preparedPayment);
+					return api.sign(preparedPayment.txJSON, secret);
+
+				}).then(function(signedPayment) {
+
+					console.log(signedPayment);
+					console.log("TX Id:", signedPayment.id);
+					//var transaction_id = signedPayment.id;
+
+					return api.submit(signedPayment.signedTransaction).catch(function(error) {
+
+						console.log("Error:", error);
+						process.exit();
+
+					});
+
+				}).then(function(submittedPayment) {
+
+					//console.log(submittedPayment);
+					//result_message.innerHTML += submittedPayment.resultCode +"<br/>" +submittedPayment.resultMessage;
+
+					if(submittedPayment.resultCode === "tesSUCCESS") {
+						console.log("交易成功送出");
+						// https://ripple.com/build/transactions/#full-transaction-response-list
+						/*
+						//mui.toast("付款成功");
+						console.log("Transaction made successfully to Bob!");
+						//return api.getTransaction(transaction_id);
+						*/
+						
+						
+						
+
+						validate_WebSocket();
+						
+						//reload after transaction success
+						
+					} else {
+
+						console.log("Something went wrong with Alice's payment!", submittedPayment);
+						process.exit();
+
+					}
+
+				}).then(function(){
+			        return api.getBalanceSheet(address);
+			    });
+			});
+			//var wvs=plus.webview.all();//initial
+				
+				
+				clicked('barcode_scan.html',true,true);
+				
+				
+				scanBtn = document.getElementById("qrcode_scan");
+				cuyBtn = document.getElementById("cuy");
+				sendWebview = plus.webview.currentWebview();
+				
+				// 监听DOMContentLoaded事件
+				//scanBtn.addEventListener('tap',function(){
+				//	clicked('barcode_scan.html',true,true);
+					//doSend(JSON.stringify(sign_info));
+				//},false);
+
+
+				
+				document.getElementById("confirmBtn").addEventListener('tap', function() {
+					//var e = document.getElementById("path_select");
+					//var co = e.options[e.selectedIndex].text;
+					//var con = document.querySelector('input[name="select_path"]:checked').value;
+					//console.log(con);
+					//console.log(document.getElementById(con).value);
+					var btnArray = ['取消', '確認'];
+					//mui.confirm('您的帳戶將會扣除'+ con +'\n是否確認繼續？', '注意', btnArray, function(e) {
+					mui.confirm('是否確認繼續？', '注意', btnArray, function(e) {
+						if (e.index == 0) {
+							//取消
+							
+						} else {
+							//總資產reload
+			  				//mui.back();
+			  				//var pick_num = document.getElementsByName("select_path");
+			  				//var pick_num = document.querySelector('input[name="select_path"]:checked').value;
+			  				//console.log(JSON.stringify(pick_num));
+			  				//console.log("pick_num"+pick_num);
+			  				//console.log("You Pick"+pick_num+" "+path[pick_num].source.maxAmount.currency+" "+path[pick_num].source.maxAmount.value);
+			  				//var j = document.getElementById("select_path").value;
+			  				plus.nativeUI.showWaiting();
+			  				console.log("Start payment");
+			  				var self = plus.webview.currentWebview();
+							mui.fire(self, 'submit_payment', {});
+							document.getElementById("confirm_btn").innerHTML = '<div class="loader mui-text-center" style=""><a><span class="mui-spinner"></span></a><span class="title">交易中...</span></div>';
+						}
+					})
+				});
+			});
+				
+			
+			
+			
+			function scaned( t, r, f ) {
+				mui.fire(plus.webview.currentWebview(), 'refresh_balance', {});
+				//console.log(r);
+				
+				try{
+					var result = atob(r);
+					var check = result.substring(0, 6);
+					if(check == "Ripple"){
+						var reg = result.split("/",4);
+						//console.log(JSON.stringify(reg));
+						qrcode_address = reg[0].toString();
+						to_account = qrcode_address.replace("Ripple:", "");
+						to_user = reg[1];
+						to_num = reg[2];
+						to_type = reg[3];
+						
+						api.connect().then(function() {
+							var pathfind = {
+								"source": {
+									"address": address
+								},
+								"destination": {
+									"address": to_account,
+									"amount": {
+										"currency": to_type,
+										"counterparty": "rJqxzXy37BrqTzduTPjM78MnPWepBntUcv",
+										"value": to_num
+									}
+								}
+							};
+							return api.getPaths(pathfind).catch(function(error) {
+								console.log("Error:", error);
+								//mui.toast("錯誤：", error);
+								//process.exit();
+								back();
+								plus.webview.close("send.html");
+								plus.webview.hide( plus.webview.currentWebview() );
+								//ws.close();
+								mui.toast("錢包餘額不足");
+							});
+						}).then(function(paths){
+							
+							console.log(JSON.stringify(paths));
+
+
+							/*
+							<ul class="mui-table-view mui-table-view-radio">
+								<li class="mui-table-view-cell">
+									<a class="mui-navigate-right">Item 1</a>
+								</li>
+								<li class="mui-table-view-cell mui-selected">
+									<a class="mui-navigate-right">Item 2</a>
+								</li>
+								<li class="mui-table-view-cell">
+									<a class="mui-navigate-right">Item 3</a>
+								</li>
+							</ul>
+							*/
+							document.getElementById('path_select').innerHTML = '<ul class="mui-table-view">';
+							for(var i=0; i<paths.length; i++){
+								var max_currency = paths[i].source.maxAmount.currency;
+								var max_value = paths[i].source.maxAmount.value;
+								var max_value_2 = Number(max_value);
+								//document.getElementById('path_select').innerHTML += '<li class="mui-table-view-cell mui-radio mui-left"><input name="radio1" type="radio"></li>';
+
+							 	if(i != 0){document.getElementById('path_select').innerHTML +=
+	'<li class="mui-table-view-cell mui-radio mui-left" id="'+i+'" value="'+max_value_2.toFixed(2)+max_currency+'"><input name="select_path" type="radio" value="'+i+'">'+max_value_2.toFixed(2) + ' ' + max_currency +'</li>';
+							} else {
+								document.getElementById('path_select').innerHTML +=
+	'<li class="mui-table-view-cell mui-radio mui-left" id="'+i+'" value="'+max_value_2.toFixed(2)+max_currency+'"><input name="select_path" type="radio" value="'+i+'" checked="checked">'+max_value_2.toFixed(2) + ' ' + max_currency +'</li>';
+							}
+								
+							
+								
+								//console.log(paths[i].source.maxAmount.currency);
+								//console.log(paths[i].source.maxAmount.value);
+							}
+							//document.getElementById('path_select').innerHTML += '<li class="mui-table-view-cell mui-radio mui-left"><input name="radio" type="radio" checked="checked>Item 5</li>';
+							//document.getElementById('path_select').innerHTML += '<li class="mui-table-view-cell mui-radio mui-left"><input name="radio" type="radio">Item 6</li>';
+							document.getElementById('path_select').innerHTML += '</ul>';
+
+							//<SELECT>
+							//<OPTION> Standard
+							// <OPTION SELECTED> 2-day
+							// <OPTION> Overnight
+							//</SELECT>
+							/*
+							document.getElementById('path_select').innerHTML += "<select id=''>";
+							for(var i=0; i<=paths.length; i++){
+								var max_currency = paths[i].source.maxAmount.currency;
+								var max_value = paths[i].source.maxAmount.value;
+								var max_value_2 = Number(max_value);
+								document.getElementById('path_select').innerHTML +='<li class="mui-table-view-cell mui-radio mui-left" id="'+i+'" value="'+max_value_2.toFixed(2)+max_currency+'">';
+								document.getElementById('path_select').innerHTML +=
+								'<option name="select_path" type="radio" value="'+i+'">'+max_value_2.toFixed(2) + ' ' + max_currency +'</option></li>';
+								
+								//console.log(paths[i].source.maxAmount.currency);
+								//console.log(paths[i].source.maxAmount.value);
+							}
+							document.getElementById('path_select').innerHTML += "</select>";
+							*/
+							//show button
+							//document.getElementById("confirmBtn").style = "";
+	
+							
+						/*
+						<li class="mui-table-view-cell mui-radio mui-left">
+							<input name="radio" type="radio">Item 6
+						</li>
+						*/
+							
+							//console.log(paths[0].source.maxAmount.value);
+							//document.getElementById("trans").value = paths[0].source.maxAmount.value;
+							//document.getElementById("cuy").innerHTML = paths[0].source.maxAmount.currency;
+							
+						});
+						
+						//console.log(qrcode_address);
+						//document.getElementById("address").value = qrcode_address.replace("Ripple:", "");
+						document.getElementById("user").value = reg[1];
+						document.getElementById("trans").value = reg[2];
+						document.getElementById("cuy").inner = reg[3];
+						//document.getElementById("address").innerHTML = qrcode_address.replace("Ripple:", "");
+						//document.getElementById("user").innerHTML = reg[1];
+	
+	
+					} else {
+						
+						mui.toast("QRCODE格式錯誤！");
+						mui.back();
+						return false;
+					}
+				} catch(e) {
+					mui.alert('請匯入正確的QRCODE', 'QRCODE無效', function() {
+					});
+					back();
+					plus.webview.close("send.html");
+					plus.webview.hide( plus.webview.currentWebview() );
+					//ws.close();
+					mui.toast("QRCODE無效！請匯入正確的QRCODE");
+					//
+					//return false;
+				}
+				
+				//var result = r
+				//console.log(result);
+				//console.log(result);
+				//print(reg);
+			    
+			}
+	</script>
+</html>

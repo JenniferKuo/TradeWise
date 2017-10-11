@@ -1,0 +1,60 @@
+html, body, .mui-content{
+	height: 100%;
+	background: white;
+}
+.mui-content-padded {
+	margin-bottom: 0;
+}
+#balance_chart {
+	height: 60%
+}
+#main {
+	height: 60%;
+}
+#chart {
+	height: 100%;
+	width: 100%;
+}
+#legend {
+	/*height: 30%; */
+	width: 100%;
+	padding: 0px 20px;
+	font-family: 'Lato', sans-serif;
+	font-size: 18px;
+	color: #4A4A4A;
+	text-align: left;
+}
+.legendText {
+	height: 40px;
+}
+.trans_currency {
+	color: #ABABAB;
+	text-align: right;
+	float: right;
+}
+.legendLabel {
+	font-size: 28px;
+}	
+#load_Balance {
+	position:absolute;
+	top: 35%;
+	left: 30%;
+}
+.mui-table-view:before {
+	content: none;
+}
+.mui-table-view:after {
+	content: none;
+}
+.mui-table-view {
+	background: white;
+}
+.mui-table-view-cell {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	/*height: 80px;*/
+	/*line-height: 45px;*/
+}
+.mui-table-view-cell:after {
+	content: none;
+}

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/icons-extra.css">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/home.css">
+		<!-- <link rel="stylesheet" type="text/css" href="css/balance.css"> -->
+	</head>
+	<body>
+		<div class="mui-content">
+			<div class="box" style="padding-top:10px;">
+			<header class="bar" style="background:transparent;">
+				<h1 class="mui-title">全球支付</h1>
+			</header>
+			<div class="box-title">
+				<div style="opacity:0.7;margin-bottom: 20px;color: white">目前帳戶<span><a href="#" id="refresh" class="mui-icon mui-icon-reload"></a></span></div>
+				<div class="box-balance">
+					<span style="opacity: 0.7;font-size: 12pt;position: relative;top: -10px">$</span>
+					<span style="font-size: 30pt" id="wallet_balance"></span>
+					<!-- <span id="cu_btn"><a>CNY</a></span> -->
+					<div class="dropdown">
+					  	<button class="dropbtn" id="currencyBtn"><!-- <span style="color:#db7134;margin-right: 5px">▾</span> -->CNY</button>
+					  	<!-- <div class="dropdown-content" style="left:0;">
+					    <a href="#">USD</a>
+					    <a href="#">XRP</a>
+					  	</div> -->
+					</div>
+					<span style="display: none"></span>
+				</div>
+			</div>
+<!-- 		<div class="mui-content-padded">
+		    <div class="mui-row">
+		        <div class="mui-col-sm-6 mui-col-xs-6" style="padding-right: 2px;">
+		            <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="send" >
+		            	<span class="mui-icon-extra mui-icon-extra-sweep"></span> 付款</button>
+		        </div>
+		        <div class="mui-col-sm-6 mui-col-xs-6">
+                    
+                    <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="receive"><span class="mui-icon-extra mui-icon-extra-prech"></span>收款</button>  
+		        </div>		        
+		    </div>
+		</div> -->
+<!-- 		<div class="swiper-container">
+    		<a id="refresh"><span class="mui-icon mui-icon-loop"></span></a>
+        	<div class="swiper-wrapper" id="swiper">
+       		</div>
+
+        	<div class="swiper-pagination"></div>
+    	</div> -->
+			</div>
+					
+    		<div class="button-area">
+			    <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="send" >
+			    <!-- <span class="mui-icon-extra mui-icon-extra-sweep"> --></span> 付款</button>
+	                    
+	            <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="receive"><span class="qrcode"><!-- <img src="images/qrcode.png" class="icon"> --></span>收款</button>  
+            </div>
+<!-- 		<div id="legend">
+			<ul class="mui-table-view">
+                <li class="mui-table-view-cell">
+                    <span style="color: #F67D00;font-size: 20pt">● </span>3620.24 USD
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #19C3B2;font-size: 20pt">● </span>744.80 CNY
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #0CA4FF;font-size: 20pt">● </span>744.80 CNY
+                </li>
+                <li class="mui-table-view-cell">
+                    <span style="color: #FF5B5B;font-size: 20pt">● </span>3620.24 USD
+                </li>                                
+            </ul>
+		</div> -->
+
+	    </div>	
+		
+	</body>
+	<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+	<script src="js/mui.min.js"></script>
+	<script src="js/own.js"></script>
+	<script src="js/ripple-0.17.4-min.js"></script>
+	<script src="js/tradewise_api.js"></script>
+	
+	<script>
+		mui.init({
+			swipeBack:false //启用右滑关闭功能
+		});
+
+		mui.plusReady(function() {
+	       
+			var address = localStorage.getItem('address');
+			
+			
+			sendBtn = document.getElementById('send');
+			receiveBtn = document.getElementById('receive');
+			currencyBtn = document.getElementById('currencyBtn');
+			wallet_balance = document.getElementById('wallet_balance');
+			t = document.getElementById('test-btn');
+			balance = document.getElementById('balance');
+			
+
+			var refreshbtn = document.getElementById("refresh");
+			refreshbtn.addEventListener("tap",function () {
+				var self = plus.webview.currentWebview();
+				self.reload();
+			});
+			
+			window.addEventListener('refresh',function(event){   //监听自定义事件
+		        var self = plus.webview.currentWebview();
+				self.reload();
+		    });
+
+			
+			
+			//載入錢包餘額
+// 			function load_balance(){
+// 				var swiper = new Swiper('.swiper-container', {
+// 						        nextButton: '.swiper-button-next',
+// 						        prevButton: '.swiper-button-prev',
+// 						        pagination: '.swiper-pagination',
+// 						        paginationType: 'fraction'
+// 						});	
+// 				document.getElementById("swiper").innerHTML = '<div class="swiper-slide"><a><span class="mui-spinner"></span></a><br /><span>載入中...</span></div>';
+// //				console.log(ripple);
+// 	   			var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+// 			    	api.connect().then(function() {
+// 			        return api.getBalanceSheet(address);
+// 			    }).then(function(Balances_R) {
+// 			    		//console.log(JSON.stringify(Balances));
+// 			    		var balances = Balances_R.assets;
+// 					document.getElementById("swiper").innerHTML = '';
+// 			    		for(var i = 0; i< balances.length; i++){
+// 			    			if( balances[i].currency != "XRP" ){
+// 			    				var num = new Number(balances[i].value);
+// 			    				document.getElementById("swiper").innerHTML += '<div class="swiper-slide"><span class="balance">'+ num.toFixed(2) + '</span><span class="currency">' + balances[i].currency + '</span></div>';
+// 			    			}
+// 					    var swiper = new Swiper('.swiper-container', {
+// 					        pagination: '.swiper-pagination',
+// 					        slidesPerView: 1,
+// 					        paginationClickable: true,
+// 					        spaceBetween: 0,
+// 					        loop: true
+// 					    });
+				    				    
+
+// 			    		}
+// //			    		console.log("hello"+JSON.stringify(dataDict));
+// 			    });
+
+// 			}
+			function load_balance(){
+				// document.getElementById("wallet_balance").innerHTML = '<div class="loader"><a><span class="mui-spinner"></span></a><br /><span>載入中...</span></div>';
+				console.log(ripple);
+			    var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+			    	api.connect().then(function() {
+			        return api.getBalanceSheet(address);
+			    }).then(function(balance_R) {
+			    		//console.log(JSON.stringify(balances));
+			    		var balances = balance_R.assets;
+			    		document.getElementById("wallet_balance").innerHTML = "";
+			    		//console.log(JSON.stringify(balanceSheet.assets));
+			    		//console.log(JSON.stringify(balances[i]));
+			    		for(var i = 0; i< balances.length; i++){
+			    			console.log(localStorage.getItem('cuy'));
+			    			if(balances[i].currency == localStorage.getItem('cuy')){
+			    				var num = new Number(balances[i].value);
+			    				// document.getElementById("wallet_balance").innerHTML += num.toFixed(2) + " " + balances[i].currency+"<br/>";
+			    				document.getElementById("wallet_balance").innerHTML = num.toFixed(2);
+			    				document.getElementById("currencyBtn").innerHTML = balances[i].currency;
+			    				break;
+			    			}
+			    		}
+			    });
+			}
+	
+			/*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			/*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			
+			
+			sendBtn.addEventListener('tap', function() {
+				//打开关于页面
+				  mui.openWindow({
+				    url: 'page/send.html', 
+				    id:'send.html',
+				    show:{
+				    	duration:0
+				    },
+				  });
+			});
+			
+			receiveBtn.addEventListener('tap', function(id,wa,ns,ws) {	
+				mui.openWindow({
+				    url: 'page/receive.html', 
+				    id:'receive.html'
+				});
+			});
+
+			currencyBtn.addEventListener('tap', function() {
+				//打开关于页面
+				mui.openWindow({
+					url: 'balance_page.html',
+					id:'balance_page.html',
+					show:{
+				      autoShow:true,//页面loaded事件发生后自动显示，默认为true
+				      aniShow:"slide-in-right"
+				    }
+				});
+			});
+
+			wallet_balance.addEventListener('tap', function() {
+				//打开关于页面
+				mui.openWindow({
+					url: 'balance_page.html',
+					id:'balance_page.html',
+					show:{
+				      autoShow:true,//页面loaded事件发生后自动显示，默认为true
+				      aniShow:"slide-in-right"
+				    }
+				});
+			});
+
+			load_balance();
+			
+			var account = localStorage.getItem('address');
+			//var secret = localStorage.getItem('secret');
+			//initial
+			
+		    
+			//触发submit按钮的点击事件
+			//mui.trigger(btn,'tap');
+			//添加newId自定义事件监听
+			
+			// var refreshbtn = document.getElementById("load_Balance");
+			// refreshbtn.addEventListener("tap",function () {
+			// 	load_balance();
+			// 	//load_balance2();
+			// });
+			
+			//var self = plus.webview.currentWebview();
+			//window.addEventListener('refresh',function(event){   //监听自定义事件
+		    //    self.reload();
+		   //});
+		});
+	</script>
+</html>

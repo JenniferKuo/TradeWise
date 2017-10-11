@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">	
+		<title>Hello MUI</title>
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/icons-extra.css">
+		<link rel="stylesheet" href="css/page.css">
+		<style>
+		.update {
+			font-style: normal;
+			color: #000000;
+			margin-right: -35px;
+			font-size: 15pt
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			  <h1 class="mui-title">
+			  	帳戶餘額
+			  </h1>
+			<a class="mui-action-back mui-btn mui-btn-link mui-back-title">關閉</a>
+		</header>
+		<br/>
+		<div class="mui-content" id="receiver">
+		
+		<ul class="mui-table-view" id="wallet_balance">
+			<li class="mui-table-view-cell">
+				<a class="">BCX<i class="mui-pull-right update" id="BCX">1.00</i>
+				</a>
+			</li>
+		</ul>
+					
+			
+		
+		<br/>
+		<div id="qrcode_bg">
+		<div id="qrcode">
+		</div>
+		</div>
+		<h4 class="add" id="add"></h4>
+		<div class="mui-card-content-inner" id="result_message">
+			
+		</div>
+		</div>
+		
+		<script src="https://tradewise.technology/webapp/js/lodash.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript" src="js/ripple-0.17.4-min.js"></script>
+		<script type="text/javascript" src="js/tradewise_api.js"></script>
+		<script type="text/javascript">
+   		mui.init({
+			swipeBack: false,
+		});
+		
+		mui.plusReady(function() {
+	       
+			var address = localStorage.getItem('address');
+			
+			// wallet_balance = document.getElementById('wallet_balance');
+			// t = document.getElementById('test-btn');
+			// balance = document.getElementById('balance');
+			
+
+			// var refreshbtn = document.getElementById("refresh");
+			// refreshbtn.addEventListener("tap",function () {
+			// 	var self = plus.webview.currentWebview();
+			// 	self.reload();
+			// });
+			
+			// window.addEventListener('refresh',function(event){   //监听自定义事件
+		 //        var self = plus.webview.currentWebview();
+			// 	self.reload();
+		 //    });
+
+			
+			
+			//載入錢包餘額
+// 			function load_balance(){
+// 				var swiper = new Swiper('.swiper-container', {
+// 						        nextButton: '.swiper-button-next',
+// 						        prevButton: '.swiper-button-prev',
+// 						        pagination: '.swiper-pagination',
+// 						        paginationType: 'fraction'
+// 						});	
+// 				document.getElementById("swiper").innerHTML = '<div class="swiper-slide"><a><span class="mui-spinner"></span></a><br /><span>載入中...</span></div>';
+// //				console.log(ripple);
+// 	   			var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+// 			    	api.connect().then(function() {
+// 			        return api.getBalanceSheet(address);
+// 			    }).then(function(Balances_R) {
+// 			    		//console.log(JSON.stringify(Balances));
+// 			    		var balances = Balances_R.assets;
+// 					document.getElementById("swiper").innerHTML = '';
+// 			    		for(var i = 0; i< balances.length; i++){
+// 			    			if( balances[i].currency != "XRP" ){
+// 			    				var num = new Number(balances[i].value);
+// 			    				document.getElementById("swiper").innerHTML += '<div class="swiper-slide"><span class="balance">'+ num.toFixed(2) + '</span><span class="currency">' + balances[i].currency + '</span></div>';
+// 			    			}
+// 					    var swiper = new Swiper('.swiper-container', {
+// 					        pagination: '.swiper-pagination',
+// 					        slidesPerView: 1,
+// 					        paginationClickable: true,
+// 					        spaceBetween: 0,
+// 					        loop: true
+// 					    });
+				    				    
+
+// 			    		}
+// //			    		console.log("hello"+JSON.stringify(dataDict));
+// 			    });
+
+// 			}
+			function load_balance(){
+				// document.getElementById("wallet_balance").innerHTML = '<div class="loader"><a><span class="mui-spinner"></span></a><br /><span>載入中...</span></div>';
+				console.log(ripple);
+			    var api = new ripple.RippleAPI({server:'ws://s.altnet.rippletest.net:51233'});
+			    	api.connect().then(function() {
+			        return api.getBalanceSheet(address);
+			    }).then(function(balance_R) {
+			    		//console.log(JSON.stringify(balances));
+			    		var balances = balance_R.assets;
+			    		document.getElementById("wallet_balance").innerHTML = "";
+			    		//console.log(JSON.stringify(balanceSheet.assets));
+			    		//console.log(JSON.stringify(balances[i]));
+			    		for(var i = 0; i< balances.length; i++){
+			    			console.log(localStorage.getItem('cuy'));
+			    				var num = new Number(balances[i].value);
+			    				// document.getElementById("wallet_balance").innerHTML += num.toFixed(2) + " " + balances[i].currency+"<br/>";
+			    				document.getElementById("wallet_balance").innerHTML = '<li class="mui-table-view-cell">'+num.toFixed(2)+'</li>';
+			    				// document.getElementById("currencyBtn").innerHTML = balances[i].currency;
+			    		}
+			    });
+			}
+	
+			/*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			/*
+			api.connect().then(function(getBalances) {
+		        return api.getBalances(address);
+		    }).then(function(account_balances){
+			  		for(var i=0; i<= account_balances.length; i++)
+			  		{
+			  			result_message.innerHTML += account_balances[i].currency + " "+account_balances[i].value + "<br/>";
+			  		}
+			 });
+			 */
+			
+			
+
+			load_balance();
+			
+			var account = localStorage.getItem('address');
+			//var secret = localStorage.getItem('secret');
+			//initial
+			
+		    
+			//触发submit按钮的点击事件
+			//mui.trigger(btn,'tap');
+			//添加newId自定义事件监听
+			
+			// var refreshbtn = document.getElementById("load_Balance");
+			// refreshbtn.addEventListener("tap",function () {
+			// 	load_balance();
+			// 	//load_balance2();
+			// });
+			
+			//var self = plus.webview.currentWebview();
+			//window.addEventListener('refresh',function(event){   //监听自定义事件
+		    //    self.reload();
+		   //});
+		});
+      </script>
+</html>
